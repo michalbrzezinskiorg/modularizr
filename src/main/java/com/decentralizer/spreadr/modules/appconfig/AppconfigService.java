@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public
 class AppconfigService {
 
     private final AppconfigPostgresPort appconfigPostgresPort;

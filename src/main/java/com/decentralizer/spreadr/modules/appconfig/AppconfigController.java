@@ -1,7 +1,5 @@
 package com.decentralizer.spreadr.modules.appconfig;
 
-import com.decentralizer.spreadr.apiGateway.domain.ControllerGateway;
-import com.decentralizer.spreadr.apiGateway.domain.RoleGateway;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
@@ -9,6 +7,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.ws.rs.HeaderParam;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,8 +29,9 @@ public class AppconfigController {
         appconfigService.addNewControllerToDatabase(controller);
     }
 
-    @GetMapping("user")
-    public User getUserByLogin(String login) {
+    @GetMapping("user/{login}")
+    public User getUserByLogin(@PathVariable String login, @HeaderParam("instance") String instance) {
+
         return appconfigService.getUserByLogin(login);
     }
 
