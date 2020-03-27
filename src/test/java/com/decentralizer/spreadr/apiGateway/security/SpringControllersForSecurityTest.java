@@ -3,15 +3,14 @@ package com.decentralizer.spreadr.apiGateway.security;
 
 import com.decentralizer.spreadr.modules.appconfig.AppconfigController;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -29,9 +28,8 @@ public class SpringControllersForSecurityTest {
         new SpringControllersForSecurity(appconfigController);
         // then
         verify(appconfigController, times(5)).addNewControllerToDatabase(controllersCaptor.capture(), instanceIdCaptor.capture());
-        assert instanceIdCaptor.getValue().equals(INSTANCE_ID);
-        assert !controllersCaptor.getAllValues().isEmpty();
-
+        assertEquals(instanceIdCaptor.getValue(), INSTANCE_ID);
+        assertEquals(controllersCaptor.getAllValues().size(), 5);
     }
 
 }

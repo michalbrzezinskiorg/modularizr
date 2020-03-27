@@ -1,8 +1,8 @@
 package com.decentralizer.spreadr.apiGateway.security;
 
-import com.decentralizer.spreadr.apiGateway.domain.ControllerGateway;
-import com.decentralizer.spreadr.apiGateway.domain.RoleGateway;
-import com.decentralizer.spreadr.apiGateway.domain.UserGateway;
+import com.decentralizer.spreadr.apiGateway.domain.ControllerGatewayDTO;
+import com.decentralizer.spreadr.apiGateway.domain.RoleGatewayDTO;
+import com.decentralizer.spreadr.apiGateway.domain.UserGatewayDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -36,7 +36,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) {
         if (loginClient == null)
             return null;
-        UserGateway user = getUser(authentication);
+        UserGatewayDTO user = getUser(authentication);
         authenticateUser(authentication.getCredentials().toString(), user);
         Set<Authority> authorities = new HashSet<>();
         setRoles(user, authorities);
@@ -45,13 +45,13 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials().toString(), authorities);
     }
 
-    private UserGateway getUser(Authentication authentication) {
+    private UserGatewayDTO getUser(Authentication authentication) {
         String login = authentication.getName();
-        UserGateway user = loginClient.getUserByLogin(login);
+        UserGatewayDTO user = loginClient.getUserByLogin(login);
         return user;
     }
 
-    private void authenticateUser(String password, UserGateway user) {
+    private void authenticateUser(String password, UserGatewayDTO user) {
         if (user == null) {
             log.info(COULD_NOT_CREATE);
             throw new BadCredentialsException(COULD_NOT_CREATE);
@@ -67,7 +67,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         }
     }
 
-    private void setPermissions(UserGateway user, Set<Authority> authorities) {
+    private void setPermissions(UserGatewayDTO user, Set<Authority> authorities) {
         log.info("finding permissions by user [{}]", user);
         loginClient
                 .findByPermissionFor(user).stream()
@@ -77,7 +77,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
                                 .forEach(c -> addControllersToAuthorities(authorities)));
     }
 
-    private Consumer<ControllerGateway> addControllersToAuthorities(Set<Authority> authorities) {
+    private Consumer<ControllerGatewayDTO> addControllersToAuthorities(Set<Authority> authorities) {
         log.info("addControllersToAuthorities [{}]", authorities);
         return action -> {
             log.info("addControllersToAuthorities action:[{}]", action);
@@ -87,14 +87,14 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         };
     }
 
-    private void setRoles(UserGateway user, Set<Authority> authorities) {
+    private void setRoles(UserGatewayDTO user, Set<Authority> authorities) {
         log.info("setRoles [{}]", user);
         loginClient.findRolesByUser(user).forEach(addRoleControllersToAuthorities(authorities));
     }
 
-    private Consumer<RoleGateway> addRoleControllersToAuthorities(Set<Authority> authorities) {
+    private Consumer<RoleGatewayDTO> addRoleControllersToAuthorities(Set<Authority> authorities) {
         log.info("addRoleControllersToAuthorities [{}]", authorities);
-        return roleGateway -> roleGateway.getControllerGateways().forEach(addControllersToAuthorities(authorities));
+        return roleGatewayDTO -> roleGatewayDTO.getControllerGatewayDTOS().forEach(addControllersToAuthorities(authorities));
     }
 
     @Override

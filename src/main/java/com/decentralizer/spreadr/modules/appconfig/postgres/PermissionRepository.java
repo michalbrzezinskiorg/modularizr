@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
-@Repository()
+@Repository
 @Transactional
 interface PermissionRepository extends PagingAndSortingRepository<PermissionEntity, Long> {
 

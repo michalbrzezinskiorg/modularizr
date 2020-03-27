@@ -3,6 +3,8 @@
 .idea/
 modularizr.iml
 mvnw
+kagka/
+postgres_data/
 mvnw.cmd
 spreadr.iml
 target/

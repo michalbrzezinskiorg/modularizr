@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-public class UserGateway {
+public class UserGatewayDTO {
     private
     Set<UserProfileEntity> profiles = new HashSet<>();
     private UUID id;
@@ -23,7 +23,7 @@ public class UserGateway {
     private ZonedDateTime lastLogged;
     private ZonedDateTime activated;
     private ZonedDateTime passwordChanged;
-    private Set<PermissionGateway> hadCreatedPrermissions = new HashSet<>();
-    private Set<PermissionGateway> permissions = new HashSet<>();
-    private Set<RoleGateway> roleGateways = new HashSet<>();
+    private Set<PermissionGatewayDTO> hadCreatedPrermissions = new HashSet<>();
+    private Set<PermissionGatewayDTO> permissions = new HashSet<>();
+    private Set<RoleGatewayDTO> roleGatewayDTOS = new HashSet<>();
 }

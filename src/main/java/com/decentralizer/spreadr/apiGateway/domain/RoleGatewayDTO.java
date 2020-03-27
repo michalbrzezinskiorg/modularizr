@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-public class RoleGateway {
+public class RoleGatewayDTO {
     private int id;
     private String name;
-    private Set<ControllerGateway> controllerGateways = new HashSet<>();
-    private Set<UserGateway> userGateways = new HashSet<>();
+    private Set<ControllerGatewayDTO> controllerGatewayDTOS = new HashSet<>();
+    private Set<UserGatewayDTO> userGatewayDTOS = new HashSet<>();
     private boolean active;
     private LocalDateTime created;
     private LocalDateTime edited;

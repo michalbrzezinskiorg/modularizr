@@ -1,7 +1,7 @@
 version: '3'
 services:
   java:
-    container_name: java
+    container_name: modularizr_java
     image: azul/zulu-openjdk-alpine:13
     volumes:
       - "./target:/home/app"
@@ -13,7 +13,7 @@ services:
     restart: always
   postgres:
     image: postgres:9.6
-    container_name: postgres
+    container_name: modularizr_postgres
     restart: always
     environment:
       - POSTGRES_DB=publisaiz
@@ -25,7 +25,7 @@ services:
       - "./postgres_data:/var/lib/postgresql/data"
       - ./initdb:/docker-entrypoint-initdb.d
   phppgadmin:
-    container_name: phppgadmin
+    container_name: modularizr_hppgadmin
     image: dockage/phppgadmin
     ports:
     - "99:80"
@@ -34,7 +34,7 @@ services:
       - PHP_PG_ADMIN_SERVER_PORT=5432
       - PHP_PG_ADMIN_SERVER_DEFAULT_DB=publisaiz
   zookeeper:
-    container_name: zookeeper
+    container_name: modularizr_zookeeper
     image: confluentinc/cp-zookeeper
     ports:
       - "2181:2181"
@@ -53,7 +53,7 @@ services:
       - ZOOKEEPER_SYNC_LIMIT=2
       - ZOOKEEPER_SERVERS=zookeeper:2888:3888
   kafka1:
-    container_name: kafka1
+    container_name: modularizr_kafka1
     image: confluentinc/cp-kafka
     depends_on:
       - zookeeper
@@ -71,7 +71,7 @@ services:
     volumes:
       - ./kafka/kafka1:/var/lib/kafka/data
   kafka2:
-    container_name: kafka2
+    container_name: modularizr_kafka2
     image: confluentinc/cp-kafka
     depends_on:
       - zookeeper
@@ -89,7 +89,7 @@ services:
     volumes:
       - ./kafka/kafka2:/var/lib/kafka/data
   kafka3:
-    container_name: kafka3
+    container_name: modularizr_kafka3
     image: confluentinc/cp-kafka
     depends_on:
       - zookeeper
@@ -107,7 +107,7 @@ services:
     volumes:
       - ./kafka/kafka3:/var/lib/kafka/data
   kafka4:
-    container_name: kafka4
+    container_name: modularizr_kafka4
     image: confluentinc/cp-kafka
     depends_on:
       - zookeeper
@@ -125,7 +125,7 @@ services:
     volumes:
       - ./kafka/kafka4:/var/lib/kafka/data
   kafka5:
-    container_name: kafka5
+    container_name: modularizr_kafka5
     image: confluentinc/cp-kafka
     depends_on:
       - zookeeper

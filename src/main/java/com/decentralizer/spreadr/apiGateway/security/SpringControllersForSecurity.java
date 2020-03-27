@@ -93,20 +93,28 @@ class SpringControllersForSecurity {
         Method[] methods = parsedClass.getMethods();
         for (Method method : methods) {
             annotations = method.getDeclaredAnnotations();
-            for (Annotation annotation : annotations) {
-                if (isMappingController(annotation)) {
-                    Iterator<Map.Entry<String[], String>> iterator = getMappingValue(annotation).entrySet().iterator();
-                    while (iterator.hasNext()) {
-                        Map.Entry<String[], String> pos = iterator.next();
-                        String mapping = Arrays.stream(pos.getKey())
-                                .map(p -> "/" + p)
-                                .collect(Collectors.joining("/"));
-                        mapping = removeDuplicatedSlashes(mapping);
-                        controllers.add(new AnnotatedController(controller, mapping, pos.getValue()));
-                    }
+            processAnnotations(controller, annotations);
+        }
+    }
+
+    private void processAnnotations(String controller, Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            if (isMappingController(annotation)) {
+                var iterator = getMappingValue(annotation).entrySet().iterator();
+                while (iterator.hasNext()) {
+                    addToControllers(controller, iterator);
                 }
             }
         }
+    }
+
+    private void addToControllers(String controller, Iterator<Map.Entry<String[], String>> iterator) {
+        Map.Entry<String[], String> pos = iterator.next();
+        String mapping = Arrays.stream(pos.getKey())
+                .map(p -> "/" + p)
+                .collect(Collectors.joining("/"));
+        mapping = removeDuplicatedSlashes(mapping);
+        controllers.add(new AnnotatedController(controller, mapping, pos.getValue()));
     }
 
     private String removeDuplicatedSlashes(String mapping) {

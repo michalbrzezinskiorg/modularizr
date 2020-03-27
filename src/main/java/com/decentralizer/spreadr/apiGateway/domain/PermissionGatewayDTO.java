@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-public class PermissionGateway {
+public class PermissionGatewayDTO {
     private long id;
     private ZonedDateTime fromDate;
     private ZonedDateTime toDate;
