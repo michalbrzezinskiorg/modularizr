@@ -1,9 +1,8 @@
 package com.decentralizer.spreadr.apiGateway.security;
 
-import com.decentralizer.spreadr.apiGateway.domain.ControllerGateway;
-import lombok.RequiredArgsConstructor;
+import com.decentralizer.spreadr.modules.appconfig.AppconfigController;
+import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -19,10 +17,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
+
 @Component
 @Transactional
 @Slf4j
-@RequiredArgsConstructor
 class SpringControllersForSecurity {
 
     private static final String GET = "GET";
@@ -30,37 +29,35 @@ class SpringControllersForSecurity {
     private static final String DELETE = "DELETE";
     private static final String PUT = "PUT";
     private static final String PATCH = "PATCH";
+    private final AppconfigController controllerServiceForSecurity;
     private final HashSet<AnnotatedController> controllers = new HashSet<>();
-    private final LoginClient controllerRepository;
-    private final ModelMapper modelMapper;
 
-
-    @PostConstruct
-    public void go() {
+    public SpringControllersForSecurity(AppconfigController appconfigController) {
+        controllerServiceForSecurity = appconfigController;
         List<Class> classes = findControllers(getScanner());
         addRequestMappingAnnotatedClassesToControllers(classes);
-        addNewControllersToDatabase(controllerRepository.findAllControllers().stream().map(s -> modelMapper.map(s, ControllerGateway.class)).collect(Collectors.toSet()));
+        addNewControllersToDatabase(controllerServiceForSecurity.findAllControllers(INSTANCE_ID));
     }
 
     public Set<AnnotatedController> getControllers() {
         return controllers;
     }
 
-    private Set<ControllerGateway> addNewControllersToDatabase(Set<ControllerGateway> existingControllerGateways) {
+    private Set<Controller> addNewControllersToDatabase(Set<Controller> existingControllers) {
         controllers.stream()
                 .map(getAnnotatedControllerActionFunction())
-                .filter(c -> !existingControllerGateways.contains(c))
-                .forEach(controllerRepository::saveController);
-        return controllerRepository.findAllControllers();
+                .filter(c -> !existingControllers.contains(c))
+                .forEach(c -> controllerServiceForSecurity.addNewControllerToDatabase(c, INSTANCE_ID));
+        return controllerServiceForSecurity.findAllControllers(INSTANCE_ID);
     }
 
-    private Function<AnnotatedController, ControllerGateway> getAnnotatedControllerActionFunction() {
+    private Function<AnnotatedController, Controller> getAnnotatedControllerActionFunction() {
         return c -> {
-            ControllerGateway controllerGateway = new ControllerGateway();
-            controllerGateway.setController(c.getClassLevelAnnotation());
-            controllerGateway.setMethod(c.getMethodLevelAnnotation());
-            controllerGateway.setHttpMethod(c.getHttpMethod());
-            return controllerGateway;
+            Controller controller = new Controller();
+            controller.setController(c.getClassLevelAnnotation());
+            controller.setMethod(c.getMethodLevelAnnotation());
+            controller.setHttpMethod(c.getHttpMethod());
+            return controller;
         };
     }
 
@@ -132,7 +129,7 @@ class SpringControllersForSecurity {
 
     private List<Class> findControllers(ClassPathScanningCandidateComponentProvider scanner) {
         List<Class> classes = new ArrayList<>();
-        for (BeanDefinition beanDefinition : scanner.findCandidateComponents("publisaiz.controller")) {
+        for (BeanDefinition beanDefinition : scanner.findCandidateComponents("com.decentralizer.spreadr")) {
             try {
                 classes.add(Class.forName(beanDefinition.getBeanClassName()));
             } catch (ClassNotFoundException e) {
@@ -156,7 +153,7 @@ class SpringControllersForSecurity {
         Map<String[], String> values = new HashMap<>();
         if (annotation.annotationType() == GetMapping.class) {
             GetMapping mapping = (GetMapping) annotation;
-            values.put(mapping.path(), GET);
+            values.put(mapping.value(), GET);
         }
         if (annotation.annotationType() == PostMapping.class) {
             PostMapping mapping = (PostMapping) annotation;

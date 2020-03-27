@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+public
 class AppconfigEventsListener {
 
     private final AppconfigPostgresPort postgresPort;
