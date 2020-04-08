@@ -1,6 +1,6 @@
-package com.decentralizer.spreadr.modules.appconfig.postgres;
+package com.decentralizer.spreadr.database.postgres;
 
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.UserEntity;
+import com.decentralizer.spreadr.database.postgres.entities.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

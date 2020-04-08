@@ -1,7 +1,7 @@
 package com.decentralizer.spreadr.apiGateway.domain;
 
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.PermissionEntity;
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.RoleEntity;
+import com.decentralizer.spreadr.database.postgres.entities.PermissionEntity;
+import com.decentralizer.spreadr.database.postgres.entities.RoleEntity;
 import lombok.Data;
 
 import java.util.Set;

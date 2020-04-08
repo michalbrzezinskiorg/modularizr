@@ -2,6 +2,7 @@ package com.decentralizer.spreadr.apiGateway.security;
 
 import com.decentralizer.spreadr.modules.appconfig.AppconfigController;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -22,18 +24,20 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @Component
 @Transactional
 @Slf4j
+@RequiredArgsConstructor
 class SpringControllersForSecurity {
+
+    private final AppconfigController controllerServiceForSecurity;
+    private final HashSet<AnnotatedController> controllers = new HashSet<>();
 
     private static final String GET = "GET";
     private static final String POST = "POST";
     private static final String DELETE = "DELETE";
     private static final String PUT = "PUT";
     private static final String PATCH = "PATCH";
-    private final AppconfigController controllerServiceForSecurity;
-    private final HashSet<AnnotatedController> controllers = new HashSet<>();
 
-    public SpringControllersForSecurity(AppconfigController appconfigController) {
-        controllerServiceForSecurity = appconfigController;
+    @PostConstruct
+    public void postConstruct() {
         List<Class> classes = findControllers(getScanner());
         addRequestMappingAnnotatedClassesToControllers(classes);
         addNewControllersToDatabase(controllerServiceForSecurity.findAllControllers(INSTANCE_ID));

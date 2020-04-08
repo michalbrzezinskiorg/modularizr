@@ -1,6 +1,6 @@
 package com.decentralizer.spreadr.apiGateway.domain;
 
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.UserProfileEntity;
+import com.decentralizer.spreadr.database.postgres.entities.UserProfileEntity;
 import lombok.Data;
 
 import java.time.ZonedDateTime;

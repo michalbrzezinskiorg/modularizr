@@ -1,5 +1,6 @@
 package com.decentralizer.spreadr.apiGateway.security;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @EnableWebSecurity
 @Transactional
 @EnableJpaAuditing
+@RequiredArgsConstructor
 class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
@@ -39,11 +41,6 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final SpringControllersForSecurity springControllersDiscovery;
     private final AuthenticationProviderImpl authenticationProvider;
-
-    public SecurityConfig(SpringControllersForSecurity springControllersDiscovery, AuthenticationProviderImpl authenticationProvider) {
-        this.springControllersDiscovery = springControllersDiscovery;
-        this.authenticationProvider = authenticationProvider;
-    }
 
     public static String stringifyController(String getClassLevelAnnotation, String getMethodLevelAnnotation, String httpMethod) {
         String stringified = getClassLevelAnnotation.concat((getMethodLevelAnnotation.length() > 0 ? getMethodLevelAnnotation : ""));

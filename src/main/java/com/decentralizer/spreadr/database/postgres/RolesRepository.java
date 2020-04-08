@@ -1,6 +1,6 @@
-package com.decentralizer.spreadr.modules.appconfig.postgres;
+package com.decentralizer.spreadr.database.postgres;
 
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.RoleEntity;
+import com.decentralizer.spreadr.database.postgres.entities.RoleEntity;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

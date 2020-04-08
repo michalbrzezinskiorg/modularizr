@@ -5,6 +5,7 @@ import com.decentralizer.spreadr.apiGateway.domain.RoleGatewayDTO;
 import com.decentralizer.spreadr.apiGateway.domain.UserGatewayDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@DependsOn("userRepository")
 class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private static final String DISABLED = "Your user is manually disabled";

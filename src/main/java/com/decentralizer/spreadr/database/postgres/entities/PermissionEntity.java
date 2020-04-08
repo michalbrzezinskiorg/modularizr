@@ -1,4 +1,4 @@
-package com.decentralizer.spreadr.modules.appconfig.postgres.entities;
+package com.decentralizer.spreadr.database.postgres.entities;
 
 import lombok.Data;
 import org.hibernate.annotations.Cache;

@@ -1,7 +1,7 @@
-package com.decentralizer.spreadr.modules.appconfig.postgres;
+package com.decentralizer.spreadr.database.postgres;
 
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.ControllerEntity;
-import com.decentralizer.spreadr.modules.appconfig.postgres.entities.UserEntity;
+import com.decentralizer.spreadr.database.postgres.entities.ControllerEntity;
+import com.decentralizer.spreadr.database.postgres.entities.UserEntity;
 import com.decentralizer.spreadr.modules.appconfig.AppconfigPostgresPort;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class AppconfigPostgresAdapter implements AppconfigPostgresPort {
+class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     private final UserRepository userRepository;
     private final ControllerRepository controllerRepository;
