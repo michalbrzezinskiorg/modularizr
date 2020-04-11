@@ -14,12 +14,14 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.decentralizer.spreadr.database.postgres.entities",
-        entityManagerFactoryRef = "pgEntityManager",
+        basePackages = "com.decentralizer.spreadr.database.postgres",
+        entityManagerFactoryRef = "pgEntityManagerFactory",
         transactionManagerRef = "pgTransactionManager")
 class PostgresConfig {
 
@@ -43,9 +45,12 @@ class PostgresConfig {
     @Primary
     @Bean(name = "pgEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean pgEntityManagerFactory(EntityManagerFactoryBuilder builder) {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put("hibernate.hbm2ddl.auto", "create");
         return builder
                 .dataSource(pgDataSource())
                 .packages("com.decentralizer.spreadr.database.postgres.entities")
+                .properties(properties)
                 .build();
     }
 

@@ -18,8 +18,8 @@ import javax.sql.DataSource;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.decentralizer.spreadr.database.mysql.entities",
-        entityManagerFactoryRef = "mysqlEntityManager",
+        basePackages = "com.decentralizer.spreadr.database.mysql",
+        entityManagerFactoryRef = "mysqlEntityManagerFactory",
         transactionManagerRef = "mysqlTransactionManager")
 public class MysqlConfig {
 

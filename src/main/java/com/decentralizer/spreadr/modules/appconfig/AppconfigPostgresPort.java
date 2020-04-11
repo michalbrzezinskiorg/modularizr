@@ -22,4 +22,10 @@ public interface AppconfigPostgresPort {
     List<Role> findRolesByUser(UUID userId);
 
     List<Permission> findByPermissionFor(UUID userId);
+
+    void removeControllerFromDatabase(Controller controller);
+
+    Controller findControllerById(String id);
+
+    boolean existsControllerById(Controller controller);
 }

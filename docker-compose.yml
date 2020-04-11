@@ -11,6 +11,15 @@ services:
       - "8000:8000"
     command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
     restart: always
+    depends_on:
+      - postgres
+      - mysql
+      - zookeeper
+      - kafka1
+      - kafka2
+      - kafka3
+      - kafka4
+      - kafka5
   postgres:
     image: postgres:9.6
     container_name: modularizr_postgres
@@ -23,12 +32,41 @@ services:
       - "5432:5432"
     volumes:
       - "./postgres_data:/var/lib/postgresql/data"
+      - ./dbinit:/docker-entrypoint-initdb.d
+  mysql:
+    image: mysql:5.7
+    container_name: modularizr_mysql
+    restart: 'always'
+    command: --sql_mode="" --max_allowed_packet=325058560
+    ports:
+      - "3306:3306"
+    volumes:
       - ./initdb:/docker-entrypoint-initdb.d
+      - ./data/mysql:/var/lib/mysql
+      - ./config/mysql:/etc/mysql/
+      - ./logs/mysql:/var/log/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: arthub
+      MYSQL_DATABASE: arthub
+      MYSQL_USER: arthub
+      MYSQL_PASSWORD: arthub
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: modularizr_phpmyadmin
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - '88:80'
+    volumes:
+      - ./sessions
   phppgadmin:
     container_name: modularizr_hppgadmin
     image: dockage/phppgadmin
     ports:
-    - "99:80"
+      - "99:80"
     environment:
       - PHP_PG_ADMIN_SERVER_HOST=postgres
       - PHP_PG_ADMIN_SERVER_PORT=5432

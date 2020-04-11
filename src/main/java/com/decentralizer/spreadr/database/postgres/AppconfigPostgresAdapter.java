@@ -9,14 +9,16 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Component
+@Service
+@Transactional
 @RequiredArgsConstructor
 class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
@@ -27,7 +29,9 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public User save(User user) {
-        return modelMapper.map(userRepository.save(modelMapper.map(user, UserEntity.class)), User.class);
+        UserEntity entity = modelMapper.map(user, UserEntity.class);
+        entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
+        return modelMapper.map(userRepository.save(entity), User.class);
     }
 
     @Override
@@ -37,7 +41,11 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public void addNewControllerToDatabase(Controller controller) {
-        controllerRepository.save(modelMapper.map(controller, ControllerEntity.class));
+        ControllerEntity entity = modelMapper.map(controller, ControllerEntity.class);
+        String name = entity.getController() + entity.getHttpMethod() + entity.getMethod();
+        UUID id = UUID.nameUUIDFromBytes(name.getBytes());
+        entity.setId(id);
+        controllerRepository.save(entity);
     }
 
     @Override
@@ -53,5 +61,22 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     @Override
     public List<Permission> findByPermissionFor(UUID userId) {
         return null;
+    }
+
+    @Override
+    public void removeControllerFromDatabase(Controller controller) {
+        controllerRepository.delete(modelMapper.map(controller, ControllerEntity.class));
+    }
+
+    @Override
+    public Controller findControllerById(String id) {
+        return modelMapper.map(controllerRepository.findById(UUID.nameUUIDFromBytes(id.getBytes())), Controller.class);
+    }
+
+    @Override
+    public boolean existsControllerById(Controller controller) {
+        String name = controller.getController() + controller.getHttpMethod() + controller.getMethod();
+        UUID id = UUID.nameUUIDFromBytes(name.getBytes());
+        return findControllerById(name) != null;
     }
 }

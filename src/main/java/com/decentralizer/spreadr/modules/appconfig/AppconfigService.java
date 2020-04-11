@@ -7,6 +7,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 class AppconfigService {
 
     private final AppconfigPostgresPort appconfigPostgresPort;
@@ -26,7 +28,11 @@ class AppconfigService {
     }
 
     public void addNewControllerToDatabase(Controller controller) {
-        applicationEventsPublisher.publish(new NewControllerFound(controller, false));
+        String id = controller.getController() + controller.getHttpMethod() + controller.getMethod();
+        Controller controllerById = appconfigPostgresPort.findControllerById(id);
+        if (controllerById == null)
+            applicationEventsPublisher.publish(new NewControllerFound(controller, false));
+        else log.error("trying to persist [{}] seems to be duplicate of [{}]", controllerById, controller);
     }
 
     public User getUserByLogin(String login) {
