@@ -75,8 +75,8 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public boolean existsControllerById(Controller controller) {
-        String name = controller.getController() + controller.getHttpMethod() + controller.getMethod();
-        UUID id = UUID.nameUUIDFromBytes(name.getBytes());
-        return findControllerById(name) != null;
+        String id = controller.getController() + controller.getHttpMethod() + controller.getMethod();
+        Controller controllerById = findControllerById(id);
+        return controllerById != null && controllerById.getId() != null;
     }
 }

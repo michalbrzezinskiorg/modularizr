@@ -5,7 +5,7 @@ modularizr.iml
 mvnw
 kafka/
 data/
-mysqlinit
+mysql-init
 mvnw.cmd
 .classpath
 .settings

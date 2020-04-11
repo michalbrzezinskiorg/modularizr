@@ -9,7 +9,6 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
 
 /**
@@ -81,7 +80,6 @@ public class Hosts {
         this.description = description;
     }
 
-    @XmlTransient
     public Collection<Institutions> getInstitutionsCollection() {
         return institutionsCollection;
     }

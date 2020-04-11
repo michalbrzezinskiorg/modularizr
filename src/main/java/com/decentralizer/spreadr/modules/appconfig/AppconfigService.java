@@ -28,11 +28,11 @@ class AppconfigService {
     }
 
     public void addNewControllerToDatabase(Controller controller) {
-        String id = controller.getController() + controller.getHttpMethod() + controller.getMethod();
-        Controller controllerById = appconfigPostgresPort.findControllerById(id);
-        if (controllerById == null)
+        boolean exists = appconfigPostgresPort.existsControllerById(controller);
+        if (!exists)
             applicationEventsPublisher.publish(new NewControllerFound(controller, false));
-        else log.error("trying to persist [{}] seems to be duplicate of [{}]", controllerById, controller);
+        else
+            log.error("trying to persist [{}] seems to be duplicate", controller);
     }
 
     public User getUserByLogin(String login) {

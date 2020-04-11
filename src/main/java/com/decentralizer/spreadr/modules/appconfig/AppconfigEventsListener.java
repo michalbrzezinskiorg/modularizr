@@ -32,7 +32,8 @@ class AppconfigEventsListener {
     }
 
     private void handleAction(Controller controller) {
-        if (!postgresPort.existsControllerById(controller))
+        boolean exists = postgresPort.existsControllerById(controller);
+        if (!exists)
             postgresPort.addNewControllerToDatabase(controller);
         else
             log.error("event duplicate for [{}]", controller);
