@@ -3,9 +3,14 @@
 .idea/
 modularizr.iml
 mvnw
-kagka/
-postgres_data/
+kafka/
+data/
+mysqlinit
 mvnw.cmd
+.classpath
+.settings
+.factorypath
+.project
 spreadr.iml
 target/
 /src/test/test.iml

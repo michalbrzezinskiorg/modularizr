@@ -31,8 +31,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - "./postgres_data:/var/lib/postgresql/data"
-      - ./dbinit:/docker-entrypoint-initdb.d
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./pg-init:/docker-entrypoint-initdb.d
   mysql:
     image: mysql:5.7
     container_name: modularizr_mysql
@@ -41,10 +41,8 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./initdb:/docker-entrypoint-initdb.d
+      - ./mysql-init:/docker-entrypoint-initdb.d
       - ./data/mysql:/var/lib/mysql
-      - ./config/mysql:/etc/mysql/
-      - ./logs/mysql:/var/log/mysql
     environment:
       MYSQL_ROOT_PASSWORD: arthub
       MYSQL_DATABASE: arthub

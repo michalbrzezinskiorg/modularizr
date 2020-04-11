@@ -2,12 +2,12 @@ package com.decentralizer.spreadr.modules.appconfig.events;
 
 import com.decentralizer.spreadr.configuration.ApplicationMessage;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
-import lombok.Value;
+import lombok.Data;
 
-@Value
+@Data
 public class UserLoggedInEvent implements ApplicationMessage {
-    private final User user;
-    private final boolean compensation;
+    private User user;
+    private boolean compensation;
 
     @Override
     public Boolean isCompensation() {
