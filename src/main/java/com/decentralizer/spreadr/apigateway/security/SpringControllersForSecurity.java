@@ -1,4 +1,4 @@
-package com.decentralizer.spreadr.apiGateway.security;
+package com.decentralizer.spreadr.apigateway.security;
 
 import com.decentralizer.spreadr.modules.appconfig.AppconfigController;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;

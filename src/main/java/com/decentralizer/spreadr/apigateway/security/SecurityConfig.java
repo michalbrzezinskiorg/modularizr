@@ -1,10 +1,9 @@
-package com.decentralizer.spreadr.apiGateway.security;
+package com.decentralizer.spreadr.apigateway.security;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +20,6 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
-@Transactional
-@EnableJpaAuditing
 @RequiredArgsConstructor
 class SecurityConfig extends WebSecurityConfigurerAdapter {
 

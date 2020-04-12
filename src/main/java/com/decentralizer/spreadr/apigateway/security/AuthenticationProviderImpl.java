@@ -1,8 +1,8 @@
-package com.decentralizer.spreadr.apiGateway.security;
+package com.decentralizer.spreadr.apigateway.security;
 
-import com.decentralizer.spreadr.apiGateway.domain.ControllerGatewayDTO;
-import com.decentralizer.spreadr.apiGateway.domain.RoleGatewayDTO;
-import com.decentralizer.spreadr.apiGateway.domain.UserGatewayDTO;
+import com.decentralizer.spreadr.apigateway.domain.ControllerGatewayDTO;
+import com.decentralizer.spreadr.apigateway.domain.RoleGatewayDTO;
+import com.decentralizer.spreadr.apigateway.domain.UserGatewayDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,14 +12,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-@Transactional
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -41,7 +39,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         Set<Authority> authorities = new HashSet<>();
         setRoles(user, authorities);
         setPermissions(user, authorities);
-//        authorities.forEach(authority -> log.info("authority [{}] ", authority));
+        authorities.forEach(authority -> log.info("authority [{}] ", authority));
         return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials().toString(), authorities);
     }
 

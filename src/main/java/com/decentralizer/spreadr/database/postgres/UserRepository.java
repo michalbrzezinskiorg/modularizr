@@ -8,9 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-interface UserRepository extends JpaRepository<UserEntity, Integer> {
+interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     Page<UserEntity> getByName(String username, Pageable pageable);
 
@@ -21,7 +22,5 @@ interface UserRepository extends JpaRepository<UserEntity, Integer> {
     UserEntity getByLoginAndPasswordEncrypted(String login, String password);
 
     UserEntity getByLogin(String login);
-
-    UserEntity getById(int user_id);
 
 }

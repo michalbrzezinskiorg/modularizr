@@ -1,4 +1,4 @@
-package com.decentralizer.spreadr.apiGateway.domain;
+package com.decentralizer.spreadr.apigateway.domain;
 
 import com.decentralizer.spreadr.database.postgres.entities.PermissionEntity;
 import com.decentralizer.spreadr.database.postgres.entities.RoleEntity;

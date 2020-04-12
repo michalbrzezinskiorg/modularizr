@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     private final UserRepository userRepository;
     private final ControllerRepository controllerRepository;
+    private final PermissionRepository permissionRepository;
     private final ModelMapper modelMapper;
     private final RolesRepository rolesRepository;
 
@@ -60,7 +62,11 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public List<Permission> findByPermissionFor(UUID userId) {
-        return null;
+        return permissionRepository.findByPermissionFor(
+                userRepository.findById(userId).get())
+                .stream()
+                .map(a -> modelMapper.map(a, Permission.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -70,13 +76,17 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public Controller findControllerById(String id) {
-        return modelMapper.map(controllerRepository.findById(UUID.nameUUIDFromBytes(id.getBytes())), Controller.class);
+        Optional<ControllerEntity> byId = controllerRepository.findById(UUID.nameUUIDFromBytes(id.getBytes()));
+        if (byId.isEmpty())
+            return null;
+        return byId.map(v -> modelMapper.map(v, Controller.class)).get();
     }
 
     @Override
     public boolean existsControllerById(Controller controller) {
         String id = controller.getController() + controller.getHttpMethod() + controller.getMethod();
         Controller controllerById = findControllerById(id);
-        return controllerById != null && controllerById.getId() != null;
+        boolean res = controllerById != null && controllerById.getId() != null;
+        return res;
     }
 }

@@ -1,4 +1,4 @@
-package com.decentralizer.spreadr.apiGateway.domain;
+package com.decentralizer.spreadr.apigateway.domain;
 
 import lombok.Data;
 

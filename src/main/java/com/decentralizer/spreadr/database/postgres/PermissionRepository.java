@@ -8,13 +8,14 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Repository
 @Transactional
 interface PermissionRepository extends PagingAndSortingRepository<PermissionEntity, Long> {
 
-    Set<PermissionEntity> findByPermissionFor(UserEntity u);
+    List<PermissionEntity> findByPermissionFor(UserEntity u);
 
     Set<PermissionEntity> findAll();
 

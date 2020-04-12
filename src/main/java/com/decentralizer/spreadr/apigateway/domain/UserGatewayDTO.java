@@ -1,4 +1,4 @@
-package com.decentralizer.spreadr.apiGateway.domain;
+package com.decentralizer.spreadr.apigateway.domain;
 
 import com.decentralizer.spreadr.database.postgres.entities.UserProfileEntity;
 import lombok.Data;

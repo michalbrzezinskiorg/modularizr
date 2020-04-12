@@ -32,7 +32,7 @@ class AppconfigService {
         if (!exists)
             applicationEventsPublisher.publish(new NewControllerFound(controller, false));
         else
-            log.error("trying to persist [{}] seems to be duplicate", controller);
+            log.info("trying to persist [{}] seems to be duplicate", controller);
     }
 
     public User getUserByLogin(String login) {

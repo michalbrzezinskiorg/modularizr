@@ -1,7 +1,7 @@
 version: '3'
 services:
-  java1:
-    container_name: modularizr_java1
+  java:
+    container_name: modularizr_java
     image: azul/zulu-openjdk-alpine:13
     volumes:
       - "./target:/home/app"
@@ -9,46 +9,6 @@ services:
     ports:
       - "8081:81"
       - "8001:8001"
-    command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
-    restart: always
-    depends_on:
-      - postgres
-      - mysql
-      - zookeeper
-      - kafka1
-      - kafka2
-      - kafka3
-      - kafka4
-      - kafka5
-  java2:
-    container_name: modularizr_java2
-    image: azul/zulu-openjdk-alpine:13
-    volumes:
-      - "./target:/home/app"
-      - "./resources:/resources"
-    ports:
-      - "8082:82"
-      - "8002:8002"
-    command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
-    restart: always
-    depends_on:
-      - postgres
-      - mysql
-      - zookeeper
-      - kafka1
-      - kafka2
-      - kafka3
-      - kafka4
-      - kafka5
-  java3:
-    container_name: modularizr_java3
-    image: azul/zulu-openjdk-alpine:13
-    volumes:
-      - "./target:/home/app"
-      - "./resources:/resources"
-    ports:
-      - "8083:83"
-      - "8003:8003"
     command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
     restart: always
     depends_on:
