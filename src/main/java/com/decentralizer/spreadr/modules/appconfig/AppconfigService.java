@@ -6,6 +6,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
+import com.decentralizer.spreadr.modules.appconfig.events.UserAccountCreated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ class AppconfigService {
     }
 
     public User getUserByLogin(String login) {
-        return appconfigPostgresPort.getUserByLogin(login);
+        return appconfigPostgresPort.findUserByLogin(login);
     }
 
     public List<Role> findRolesByUser(@PathVariable("id") UUID userId) {
@@ -45,5 +46,13 @@ class AppconfigService {
 
     public List<Permission> findByPermissionFor(@PathVariable("id") UUID userId) {
         return appconfigPostgresPort.findByPermissionFor(userId);
+    }
+
+    public void createUser(User user) {
+        User existing = appconfigPostgresPort.findUserByLogin(user.getLogin());
+        if (existing == null)
+            applicationEventsPublisher.publish(new UserAccountCreated(user));
+        else
+            log.info("skipped creation existing user [{}]", user);
     }
 }

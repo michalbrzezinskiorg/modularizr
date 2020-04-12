@@ -12,9 +12,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -34,7 +36,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) {
         if (appConfigClient == null)
             return null;
-        UserGatewayDTO user = getUser(authentication);
+        Mono<UserGatewayDTO> user = getUser(authentication);
         authenticateUser(authentication.getCredentials().toString(), user);
         Set<Authority> authorities = new HashSet<>();
         setRoles(user, authorities);
@@ -43,32 +45,43 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials().toString(), authorities);
     }
 
-    private UserGatewayDTO getUser(Authentication authentication) {
+    private Mono<UserGatewayDTO> getUser(Authentication authentication) {
         String login = authentication.getName();
-        UserGatewayDTO user = appConfigClient.getUserByLogin(login);
+        Mono<UserGatewayDTO> user = appConfigClient.getUserByLogin(login)
+                .onErrorReturn(createUserAccount(login, authentication.getCredentials().toString()).block())
+                .switchIfEmpty(createUserAccount(login, authentication.getCredentials().toString()));
         return user;
     }
 
-    private void authenticateUser(String password, UserGatewayDTO user) {
-        if (user == null) {
+    private Mono<UserGatewayDTO> createUserAccount(String login, String password) {
+        UserGatewayDTO userGatewayDTO = new UserGatewayDTO();
+        userGatewayDTO.setLogin(login);
+        userGatewayDTO.setPassword(password);
+        return appConfigClient.createUserAcount(userGatewayDTO);
+    }
+
+    private void authenticateUser(String password, Mono<UserGatewayDTO> user) {
+        Optional<UserGatewayDTO> userGatewayDTO = user.blockOptional();
+        if (userGatewayDTO.isEmpty()) {
             log.info(COULD_NOT_CREATE);
             throw new BadCredentialsException(COULD_NOT_CREATE);
-        } else if (!user.isEnabled()) {
+        } else if (userGatewayDTO.get().isEnabled()) {
             log.info(DISABLED);
             throw new BadCredentialsException(DISABLED);
-        } else if (user.getActivated() == null || user.getActivated().isAfter(ZonedDateTime.now())) {
+        } else if (userGatewayDTO.get().getActivated() == null || userGatewayDTO.get().getActivated().isAfter(ZonedDateTime.now())) {
             log.info(CONFIRM_EMAIL);
             throw new BadCredentialsException(CONFIRM_EMAIL);
-        } else if (!passwordEncoder.matches(password, user.getPassword())) {
+        } else if (!passwordEncoder.matches(password, userGatewayDTO.get().getPassword())) {
             log.info(WRONG);
             throw new BadCredentialsException(WRONG);
         }
     }
 
-    private void setPermissions(UserGatewayDTO user, Set<Authority> authorities) {
+    private void setPermissions(Mono<UserGatewayDTO> user, Set<Authority> authorities) {
         log.info("finding permissions by user [{}]", user);
-        appConfigClient
-                .findByPermissionFor(user).stream()
+        user.map(u -> appConfigClient.findByPermissionFor(u))
+                .block()
+                .stream()
                 .filter(p -> p.isActive())
                 .forEach(permission ->
                         permission.getControllers()
@@ -85,9 +98,10 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         };
     }
 
-    private void setRoles(UserGatewayDTO user, Set<Authority> authorities) {
+    private void setRoles(Mono<UserGatewayDTO> user, Set<Authority> authorities) {
         log.info("setRoles [{}]", user);
-        appConfigClient.findRolesByUser(user).forEach(addRoleControllersToAuthorities(authorities));
+        user.map(appConfigClient::findRolesByUser).block()
+                .forEach(addRoleControllersToAuthorities(authorities));
     }
 
     private Consumer<RoleGatewayDTO> addRoleControllersToAuthorities(Set<Authority> authorities) {

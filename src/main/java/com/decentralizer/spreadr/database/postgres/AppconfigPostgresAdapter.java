@@ -9,9 +9,11 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,10 +30,13 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     private final PermissionRepository permissionRepository;
     private final ModelMapper modelMapper;
     private final RolesRepository rolesRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public User save(User user) {
         UserEntity entity = modelMapper.map(user, UserEntity.class);
+        entity.setPasswordEncrypted(passwordEncoder.encode(user.getPassword()));
+        entity.setPasswordChanged(ZonedDateTime.now());
         entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
         return modelMapper.map(userRepository.save(entity), User.class);
     }
@@ -51,8 +56,11 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     }
 
     @Override
-    public User getUserByLogin(String login) {
-        return modelMapper.map(userRepository.getByLogin(login), User.class);
+    public User findUserByLogin(String login) {
+        UserEntity byLogin = userRepository.getByLogin(login);
+        if (byLogin == null)
+            return null;
+        return modelMapper.map(byLogin, User.class);
     }
 
     @Override

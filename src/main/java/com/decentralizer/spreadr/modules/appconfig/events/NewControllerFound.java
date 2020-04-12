@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NewControllerFound implements ApplicationMessage {
     private Controller controller;
-    private Boolean compensation;
+    private boolean compensation;
 
     @Override
-    public Boolean isCompensation() {
+    public boolean isCompensation() {
         return this.compensation;
     }
 }

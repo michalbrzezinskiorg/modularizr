@@ -10,6 +10,8 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
+
 @Slf4j
 @Configuration
 @EnableScheduling
@@ -17,7 +19,7 @@ class BeansConfig {
 
     @Bean
     public WebClient webClient() {
-        return WebClient.builder().filter(filter()).build();
+        return WebClient.builder().defaultHeader("instance", INSTANCE_ID).filter(filter()).build();
     }
 
 
@@ -34,14 +36,11 @@ class BeansConfig {
 
     private ExchangeFilterFunction filter() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            if (log.isDebugEnabled()) {
-                StringBuilder sb = new StringBuilder("Request: \n");
-                //append clientRequest method and url
-                clientRequest
-                        .headers()
-                        .forEach((name, values) -> values.forEach(value -> log.info(" ::: ============> {} : [{}]", name, value)));
-                log.debug(sb.toString());
-            }
+            clientRequest
+                    .headers()
+                    .forEach((name, values) ->
+                            values.forEach(value ->
+                                    log.info("sending request with header ::: {} : [{}]", name, value)));
             return Mono.just(clientRequest);
         });
     }

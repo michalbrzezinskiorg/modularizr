@@ -13,6 +13,7 @@ import java.util.UUID;
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @Data
+@Table(name = "userprofile")
 public class UserProfileEntity {
 
     @Id

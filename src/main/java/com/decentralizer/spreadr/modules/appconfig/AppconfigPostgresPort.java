@@ -17,7 +17,7 @@ public interface AppconfigPostgresPort {
 
     void addNewControllerToDatabase(Controller controller);
 
-    User getUserByLogin(String login);
+    User findUserByLogin(String login);
 
     List<Role> findRolesByUser(UUID userId);
 

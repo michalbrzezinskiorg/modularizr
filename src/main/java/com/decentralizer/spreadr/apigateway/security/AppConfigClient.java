@@ -9,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,16 +37,17 @@ class AppConfigClient {
         applicationUri = url + ctx;
     }
 
-    public UserGatewayDTO getUserByLogin(String login) {
-        return webClient.get()
+    public Mono<UserGatewayDTO> getUserByLogin(String login) {
+        return Mono.from(webClient.get()
                 .uri(applicationUri + "/application/user/" + login)
                 .header("instance", INSTANCE_ID)
                 .retrieve()
-                .bodyToFlux(UserGatewayDTO.class).blockFirst();
+                .bodyToFlux(UserGatewayDTO.class));
     }
 
     public List<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
-        return webClient.get()
+        return webClient
+                .get()
                 .uri(applicationUri + "/application/user/" + user.getId() + "/permissions")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
@@ -52,7 +55,8 @@ class AppConfigClient {
     }
 
     public List<RoleGatewayDTO> findRolesByUser(UserGatewayDTO user) {
-        return webClient.get()
+        return webClient
+                .get()
                 .uri(applicationUri + "/application/user/" + user.getId() + "/roles")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
@@ -60,7 +64,8 @@ class AppConfigClient {
     }
 
     public Set<Controller> findAllControllers(String instanceId) {
-        return webClient.get()
+        return webClient
+                .get()
                 .uri(applicationUri + "/application/controllers/")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
@@ -71,13 +76,33 @@ class AppConfigClient {
                 .collect(Collectors.toSet());
     }
 
-    public void addNewControllerToDatabase(Controller c, String instanceId) {
-        webClient.post()
+    public void addNewControllerToDatabase(final Controller c, final String instanceId) {
+        webClient
+                .post()
                 .uri(applicationUri + "/application/controllers/")
                 .header("instance", INSTANCE_ID)
                 .bodyValue(c)
                 .retrieve().toBodilessEntity()
-                .doOnError(e -> log.error("[{}]", e.getMessage()))
-                .doOnSuccess(s -> log.info("success [{}]", s));
+                .doFirst(() -> log.info("addNewControllerToDatabase before [{}]", c))
+                .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
+                .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
+                .retryBackoff(5, Duration.ofSeconds(10))
+                .delaySubscription(Duration.ofSeconds(10))
+                .subscribe();
+    }
+
+    public Mono<UserGatewayDTO> createUserAcount(UserGatewayDTO userGatewayDTO) {
+        return webClient
+                .post()
+                .uri(applicationUri + "/application/users")
+                .header("instance", INSTANCE_ID)
+                .bodyValue(userGatewayDTO)
+                .retrieve().toEntity(UserGatewayDTO.class)
+                .doFirst(() -> log.info("addNewControllerToDatabase before"))
+                .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
+                .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
+                .retryBackoff(5, Duration.ofSeconds(10))
+                //.blockOptional()
+                .map(r -> r.getBody());
     }
 }

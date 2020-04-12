@@ -2,6 +2,7 @@ package com.decentralizer.spreadr.configuration.kafka;
 
 import com.decentralizer.spreadr.modules.appconfig.AppconfigEventsListener;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
+import com.decentralizer.spreadr.modules.appconfig.events.UserAccountCreated;
 import com.decentralizer.spreadr.modules.appconfig.events.UserLoggedInEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,11 @@ public class KafkaListenerDispatcher {
 
     @KafkaHandler
     public void listen(UserLoggedInEvent message) {
+        appconfigEventsListener.handleMessage(message);
+    }
+
+    @KafkaHandler
+    public void listen(UserAccountCreated message) {
         appconfigEventsListener.handleMessage(message);
     }
 

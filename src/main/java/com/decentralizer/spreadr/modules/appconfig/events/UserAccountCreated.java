@@ -5,12 +5,16 @@ import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.Data;
 
 @Data
-public class UserLoggedInEvent implements ApplicationMessage {
+public class UserAccountCreated implements ApplicationMessage {
+    private boolean componsation;
     private User user;
-    private boolean compensation;
+
+    public UserAccountCreated(User user) {
+        this.user = user;
+    }
 
     @Override
     public boolean isCompensation() {
-        return compensation;
+        return componsation;
     }
 }

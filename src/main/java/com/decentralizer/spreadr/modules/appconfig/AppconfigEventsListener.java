@@ -2,6 +2,7 @@ package com.decentralizer.spreadr.modules.appconfig;
 
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
+import com.decentralizer.spreadr.modules.appconfig.events.UserAccountCreated;
 import com.decentralizer.spreadr.modules.appconfig.events.UserLoggedInEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +20,12 @@ class AppconfigEventsListener {
         postgresPort.save(message.getUser());
     }
 
+    public void handleMessage(UserAccountCreated message) {
+        postgresPort.save(message.getUser());
+    }
+
     public void handleMessage(NewControllerFound message) {
-        if (message.getCompensation()) {
+        if (message.isCompensation()) {
             handleCompensation(message.getController());
         } else {
             handleAction(message.getController());
