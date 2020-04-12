@@ -11,8 +11,8 @@ import java.util.UUID;
 public class RoleGatewayDTO {
     private int id;
     private String name;
-    private Set<ControllerGatewayDTO> controllerGatewayDTOS = new HashSet<>();
-    private Set<UserGatewayDTO> userGatewayDTOS = new HashSet<>();
+    private final Set<ControllerGatewayDTO> controllerGatewayDTOS = new HashSet<>();
+    private final Set<UserGatewayDTO> userGatewayDTOS = new HashSet<>();
     private boolean active;
     private LocalDateTime created;
     private LocalDateTime edited;
@@ -20,5 +20,18 @@ public class RoleGatewayDTO {
     private String editedBy;
     private UUID version;
 
+    @Override
+    public String toString() {
+        return "RoleGatewayDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", active=" + active +
+                ", created=" + created +
+                ", edited=" + edited +
+                ", createdBy='" + createdBy + '\'' +
+                ", editedBy='" + editedBy + '\'' +
+                ", version=" + version +
+                '}';
+    }
 }
 

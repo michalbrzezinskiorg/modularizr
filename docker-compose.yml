@@ -1,14 +1,54 @@
 version: '3'
 services:
-  java:
-    container_name: modularizr_java
+  java1:
+    container_name: modularizr_java1
     image: azul/zulu-openjdk-alpine:13
     volumes:
       - "./target:/home/app"
       - "./resources:/resources"
     ports:
-      - "8080:80"
-      - "8000:8000"
+      - "8081:81"
+      - "8001:8001"
+    command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
+    restart: always
+    depends_on:
+      - postgres
+      - mysql
+      - zookeeper
+      - kafka1
+      - kafka2
+      - kafka3
+      - kafka4
+      - kafka5
+  java2:
+    container_name: modularizr_java2
+    image: azul/zulu-openjdk-alpine:13
+    volumes:
+      - "./target:/home/app"
+      - "./resources:/resources"
+    ports:
+      - "8082:82"
+      - "8002:8002"
+    command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
+    restart: always
+    depends_on:
+      - postgres
+      - mysql
+      - zookeeper
+      - kafka1
+      - kafka2
+      - kafka3
+      - kafka4
+      - kafka5
+  java3:
+    container_name: modularizr_java3
+    image: azul/zulu-openjdk-alpine:13
+    volumes:
+      - "./target:/home/app"
+      - "./resources:/resources"
+    ports:
+      - "8083:83"
+      - "8003:8003"
     command: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n -jar /home/app/spreadr-0.0.1-SNAPSHOT.jar
     restart: always
     depends_on:
@@ -61,7 +101,7 @@ services:
     volumes:
       - ./sessions
   phppgadmin:
-    container_name: modularizr_hppgadmin
+    container_name: modularizr_pgadmin
     image: dockage/phppgadmin
     ports:
       - "99:80"
@@ -105,7 +145,7 @@ services:
       - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
       - ZOOKEEPER=localhost:2181
     volumes:
-      - ./kafka/kafka1:/var/lib/kafka/data
+      - ./data/kafka/kafka1:/var/lib/kafka/data
   kafka2:
     container_name: modularizr_kafka2
     image: confluentinc/cp-kafka
@@ -123,7 +163,7 @@ services:
       - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
       - ZOOKEEPER=zookeeper:2181
     volumes:
-      - ./kafka/kafka2:/var/lib/kafka/data
+      - ./data/kafka/kafka2:/var/lib/kafka/data
   kafka3:
     container_name: modularizr_kafka3
     image: confluentinc/cp-kafka
@@ -141,7 +181,7 @@ services:
       - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
       - ZOOKEEPER=zookeeper:2181
     volumes:
-      - ./kafka/kafka3:/var/lib/kafka/data
+      - ./data/kafka/kafka3:/var/lib/kafka/data
   kafka4:
     container_name: modularizr_kafka4
     image: confluentinc/cp-kafka
@@ -159,7 +199,7 @@ services:
       - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
       - ZOOKEEPER=zookeeper:2181
     volumes:
-      - ./kafka/kafka4:/var/lib/kafka/data
+      - ./data/kafka/kafka4:/var/lib/kafka/data
   kafka5:
     container_name: modularizr_kafka5
     image: confluentinc/cp-kafka
@@ -178,5 +218,4 @@ services:
       - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
       - ZOOKEEPER=zookeeper:2181
     volumes:
-      - ./kafka/kafka5:/var/lib/kafka/data
-
+      - ./data/kafka/kafka5:/var/lib/kafka/data
