@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,11 +28,16 @@ class AppConfigClient {
     String url;
     @Value("${server.servlet.context-path}")
     String ctx;
+    private String applicationUri;
 
+    @PostConstruct
+    public void setApplicationUri() {
+        applicationUri = url + ctx;
+    }
 
     public UserGatewayDTO getUserByLogin(String login) {
         return webClient.get()
-                .uri(url + ctx + "/application/user/" + login)
+                .uri(applicationUri + "/application/user/" + login)
                 .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(UserGatewayDTO.class).blockFirst();
@@ -39,7 +45,7 @@ class AppConfigClient {
 
     public List<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
         return webClient.get()
-                .uri(url + ctx + "/application/user/" + user.getId() + "/permissions")
+                .uri(applicationUri + "/application/user/" + user.getId() + "/permissions")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(PermissionGatewayDTO.class).buffer().blockFirst();
@@ -47,7 +53,7 @@ class AppConfigClient {
 
     public List<RoleGatewayDTO> findRolesByUser(UserGatewayDTO user) {
         return webClient.get()
-                .uri(url + ctx + "/application/user/" + user.getId() + "/roles")
+                .uri(applicationUri + "/application/user/" + user.getId() + "/roles")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(RoleGatewayDTO.class).buffer().blockFirst();
@@ -55,7 +61,7 @@ class AppConfigClient {
 
     public Set<Controller> findAllControllers(String instanceId) {
         return webClient.get()
-                .uri(url + ctx + "/application/controllers/")
+                .uri(applicationUri + "/application/controllers/")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(Controller.class)
@@ -67,7 +73,7 @@ class AppConfigClient {
 
     public void addNewControllerToDatabase(Controller c, String instanceId) {
         webClient.post()
-                .uri(url + ctx + "/application/controllers/")
+                .uri(applicationUri + "/application/controllers/")
                 .header("instance", INSTANCE_ID)
                 .bodyValue(c)
                 .retrieve().toBodilessEntity()
