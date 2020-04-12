@@ -28,12 +28,12 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String WEBSOCKET = "/messages/**";
     private static final String LOGOUT = "/users/logout";
     private static final String EXCEPTION = "/error";
-    private static final String ARTICLES = "/articles/all";
-    private static final String ARTICLE = "/articles/article/**";
+    private static final String USERS_INTERNAL = "/application/user/**";
+    private static final String SWAGGER = "/swagger-ui.http";
     private static final String FILES_ONE = "/files/one/**";
     private static final String H2 = "/h2/**";
     private static final String USERS_WHOAMI = "/users/whoami";
-    private static final String[] PUBLIC_PLACES = {WEBSOCKET, ARTICLES, ARTICLE, LOGOUT, FILES_ONE, USERS_WHOAMI, H2, EXCEPTION};
+    private static final String[] PUBLIC_PLACES = {WEBSOCKET, USERS_INTERNAL, SWAGGER, LOGOUT, FILES_ONE, USERS_WHOAMI, H2, EXCEPTION};
 
     private final SpringControllersForSecurity springControllersDiscovery;
     private final AuthenticationProviderImpl authenticationProvider;

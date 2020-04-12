@@ -28,11 +28,11 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
     private static final String CONFIRM_EMAIL = "PLEASE CONFIRM YOUR EMAIL!";
     private static final String WRONG = "WRONG PASSWORD";
     private final BCryptPasswordEncoder passwordEncoder;
-    private final LoginClient loginClient;
+    private final AppConfigClient appConfigClient;
 
     @Override
     public Authentication authenticate(Authentication authentication) {
-        if (loginClient == null)
+        if (appConfigClient == null)
             return null;
         UserGatewayDTO user = getUser(authentication);
         authenticateUser(authentication.getCredentials().toString(), user);
@@ -45,7 +45,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private UserGatewayDTO getUser(Authentication authentication) {
         String login = authentication.getName();
-        UserGatewayDTO user = loginClient.getUserByLogin(login);
+        UserGatewayDTO user = appConfigClient.getUserByLogin(login);
         return user;
     }
 
@@ -67,7 +67,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private void setPermissions(UserGatewayDTO user, Set<Authority> authorities) {
         log.info("finding permissions by user [{}]", user);
-        loginClient
+        appConfigClient
                 .findByPermissionFor(user).stream()
                 .filter(p -> p.isActive())
                 .forEach(permission ->
@@ -87,7 +87,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private void setRoles(UserGatewayDTO user, Set<Authority> authorities) {
         log.info("setRoles [{}]", user);
-        loginClient.findRolesByUser(user).forEach(addRoleControllersToAuthorities(authorities));
+        appConfigClient.findRolesByUser(user).forEach(addRoleControllersToAuthorities(authorities));
     }
 
     private Consumer<RoleGatewayDTO> addRoleControllersToAuthorities(Set<Authority> authorities) {

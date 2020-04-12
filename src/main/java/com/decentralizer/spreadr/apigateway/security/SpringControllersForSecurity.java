@@ -1,6 +1,5 @@
 package com.decentralizer.spreadr.apigateway.security;
 
-import com.decentralizer.spreadr.modules.appconfig.AppconfigController;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,7 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @RequiredArgsConstructor
 class SpringControllersForSecurity {
 
-    private final AppconfigController controllerServiceForSecurity;
+    private final AppConfigClient appConfigClient;
     private final HashSet<AnnotatedController> controllers = new HashSet<>();
 
     private static final String GET = "GET";
@@ -40,19 +39,17 @@ class SpringControllersForSecurity {
     public void postConstruct() {
         List<Class> classes = findControllers(getScanner());
         addRequestMappingAnnotatedClassesToControllers(classes);
-        addNewControllersToDatabase(controllerServiceForSecurity.findAllControllers(INSTANCE_ID));
+        addNewControllersToDatabase();
     }
 
     public Set<AnnotatedController> getControllers() {
         return controllers;
     }
 
-    private Set<Controller> addNewControllersToDatabase(Set<Controller> existingControllers) {
+    private void addNewControllersToDatabase() {
         controllers.stream()
                 .map(getAnnotatedControllerActionFunction())
-                .filter(c -> !existingControllers.contains(c))
-                .forEach(c -> controllerServiceForSecurity.addNewControllerToDatabase(c, INSTANCE_ID));
-        return controllerServiceForSecurity.findAllControllers(INSTANCE_ID);
+                .forEach(c -> appConfigClient.addNewControllerToDatabase(c, INSTANCE_ID));
     }
 
     private Function<AnnotatedController, Controller> getAnnotatedControllerActionFunction() {
