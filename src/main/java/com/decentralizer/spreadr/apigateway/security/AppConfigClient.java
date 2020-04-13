@@ -9,13 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 
@@ -45,35 +43,31 @@ class AppConfigClient {
                 .bodyToFlux(UserGatewayDTO.class));
     }
 
-    public List<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
+    public Flux<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/user/" + user.getId() + "/permissions")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
-                .bodyToFlux(PermissionGatewayDTO.class).buffer().blockFirst();
+                .bodyToFlux(PermissionGatewayDTO.class);
     }
 
-    public List<RoleGatewayDTO> findRolesByUser(UserGatewayDTO user) {
+    public Flux<RoleGatewayDTO> findRolesByUser(UserGatewayDTO user) {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/user/" + user.getId() + "/roles")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
-                .bodyToFlux(RoleGatewayDTO.class).buffer().blockFirst();
+                .bodyToFlux(RoleGatewayDTO.class);
     }
 
-    public Set<Controller> findAllControllers(String instanceId) {
+    public Flux<Controller> findAllControllers(String instanceId) {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/controllers/")
                 .header("instance", INSTANCE_ID)
                 .retrieve()
-                .bodyToFlux(Controller.class)
-                .buffer()
-                .blockFirst()
-                .stream()
-                .collect(Collectors.toSet());
+                .bodyToFlux(Controller.class);
     }
 
     public void addNewControllerToDatabase(final Controller c, final String instanceId) {
@@ -102,7 +96,6 @@ class AppConfigClient {
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
                 .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
                 .retryBackoff(5, Duration.ofSeconds(10))
-                //.blockOptional()
                 .map(r -> r.getBody());
     }
 }

@@ -81,8 +81,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         log.info("finding permissions by user [{}]", user);
         user.map(u -> appConfigClient.findByPermissionFor(u))
                 .block()
-                .stream()
-                .filter(p -> p.isActive())
+                .filter(p -> p.isActive()).toStream()
                 .forEach(permission ->
                         permission.getControllers()
                                 .forEach(c -> addControllersToAuthorities(authorities)));
@@ -100,7 +99,7 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private void setRoles(Mono<UserGatewayDTO> user, Set<Authority> authorities) {
         log.info("setRoles [{}]", user);
-        user.map(appConfigClient::findRolesByUser).block()
+        user.map(appConfigClient::findRolesByUser).block().toStream()
                 .forEach(addRoleControllersToAuthorities(authorities));
     }
 
