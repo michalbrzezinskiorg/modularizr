@@ -1,7 +1,7 @@
 package com.decentralizer.spreadr.database.postgres;
 
-import com.decentralizer.spreadr.database.postgres.entities.ControllerEntity;
-import com.decentralizer.spreadr.database.postgres.entities.UserEntity;
+import com.decentralizer.spreadr.database.postgres.tables.ControllerDBRow;
+import com.decentralizer.spreadr.database.postgres.tables.UserDBRow;
 import com.decentralizer.spreadr.modules.appconfig.AppconfigPostgresPort;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
@@ -12,13 +12,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -33,68 +31,60 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public User save(User user) {
-        UserEntity entity = modelMapper.map(user, UserEntity.class);
+    public Mono<User> save(User user) {
+        UserDBRow entity = modelMapper.map(user, UserDBRow.class);
         entity.setPasswordEncrypted(passwordEncoder.encode(user.getPassword()));
         entity.setPasswordChanged(ZonedDateTime.now());
         entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
-        return modelMapper.map(userRepository.save(entity), User.class);
+        return userRepository.save(entity).map(a -> modelMapper.map(a, User.class));
     }
 
     @Override
-    public Set<Controller> findAllControllers() {
-        return controllerRepository.findAll().stream().map(c -> modelMapper.map(c, Controller.class)).collect(Collectors.toSet());
+    public Flux<Controller> findAllControllers() {
+        return controllerRepository.findAll().map(c -> modelMapper.map(c, Controller.class));
     }
 
     @Override
     public void addNewControllerToDatabase(Controller controller) {
-        ControllerEntity entity = modelMapper.map(controller, ControllerEntity.class);
+        ControllerDBRow entity = modelMapper.map(controller, ControllerDBRow.class);
         String name = entity.getController() + entity.getHttpMethod() + entity.getMethod();
         UUID id = UUID.nameUUIDFromBytes(name.getBytes());
         entity.setId(id);
-        controllerRepository.save(entity);
+        controllerRepository.save(entity).subscribe();
     }
 
     @Override
-    public User findUserByLogin(String login) {
-        UserEntity byLogin = userRepository.getByLogin(login);
-        if (byLogin == null)
-            return null;
-        return modelMapper.map(byLogin, User.class);
+    public Mono<User> findUserByLogin(String login) {
+        return userRepository.getByLogin(login).map(a -> modelMapper.map(a, User.class));
     }
 
     @Override
-    public List<Role> findRolesByUser(UUID userId) {
+    public Flux<Role> findRolesByUser(UUID userId) {
         return rolesRepository.findByUsers_id(userId);
     }
 
     @Override
-    public List<Permission> findByPermissionFor(UUID userId) {
+    public Flux<Permission> findByPermissionFor(UUID userId) {
         return permissionRepository.findByPermissionFor(
-                userRepository.findById(userId).get())
-                .stream()
-                .map(a -> modelMapper.map(a, Permission.class))
-                .collect(Collectors.toList());
+                userRepository.findById(userId))
+                .map(a -> modelMapper.map(a, Permission.class));
     }
 
     @Override
     public void removeControllerFromDatabase(Controller controller) {
-        controllerRepository.delete(modelMapper.map(controller, ControllerEntity.class));
+        controllerRepository.delete(modelMapper.map(controller, ControllerDBRow.class));
     }
 
     @Override
-    public Controller findControllerById(String id) {
-        Optional<ControllerEntity> byId = controllerRepository.findById(UUID.nameUUIDFromBytes(id.getBytes()));
-        if (byId.isEmpty())
-            return null;
-        return byId.map(v -> modelMapper.map(v, Controller.class)).get();
+    public Mono<Controller> findControllerById(String id) {
+        return controllerRepository
+                .findById(UUID.nameUUIDFromBytes(id.getBytes()))
+                .map(v -> modelMapper.map(v, Controller.class));
     }
 
     @Override
     public boolean existsControllerById(Controller controller) {
         String id = controller.getController() + controller.getHttpMethod() + controller.getMethod();
-        Controller controllerById = findControllerById(id);
-        boolean res = controllerById != null && controllerById.getId() != null;
-        return res;
+        return findControllerById(id).blockOptional().isPresent();
     }
 }

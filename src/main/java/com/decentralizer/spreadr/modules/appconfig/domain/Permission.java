@@ -1,6 +1,6 @@
 package com.decentralizer.spreadr.modules.appconfig.domain;
 
-import com.decentralizer.spreadr.database.postgres.entities.UserEntity;
+import com.decentralizer.spreadr.database.postgres.tables.UserDBRow;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
@@ -14,8 +14,8 @@ public class Permission {
     private ZonedDateTime fromDate;
     private ZonedDateTime toDate;
     private boolean active;
-    private UserEntity createdBy;
-    private UserEntity permissionFor;
+    private UserDBRow createdBy;
+    private UserDBRow permissionFor;
     private Set<Controller> controllers = new HashSet<>();
     private UUID version;
 }

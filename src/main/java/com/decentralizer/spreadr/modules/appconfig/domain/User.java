@@ -1,6 +1,6 @@
 package com.decentralizer.spreadr.modules.appconfig.domain;
 
-import com.decentralizer.spreadr.database.postgres.entities.UserProfileEntity;
+import com.decentralizer.spreadr.database.postgres.tables.UserProfileDBRow;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 public class User {
     private
-    Set<UserProfileEntity> profiles = new HashSet<>();
+    Set<UserProfileDBRow> profiles = new HashSet<>();
     private UUID id;
     private String name;
     private String surname;

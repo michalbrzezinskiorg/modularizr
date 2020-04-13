@@ -1,64 +1,42 @@
 package com.decentralizer.spreadr.database.postgres;
 
-import com.zaxxer.hikari.HikariDataSource;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
-import org.springframework.context.annotation.Bean;
+import io.r2dbc.postgresql.PostgresqlConnectionConfiguration;
+import io.r2dbc.postgresql.PostgresqlConnectionFactory;
+import io.r2dbc.spi.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
+import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 
 
 @Configuration
-@EnableJpaRepositories(
-        basePackages = "com.decentralizer.spreadr.database.postgres",
-        entityManagerFactoryRef = "pgEntityManagerFactory",
-        transactionManagerRef = "pgTransactionManager")
-class PostgresConfig {
+@EnableR2dbcRepositories(basePackages = {"com.decentralizer.spreadr.database.postgres", "com.decentralizer.spreadr.database.postgres.entities"})
+class PostgresConfig extends AbstractR2dbcConfiguration {
 
-    @Bean
-    @Primary
-    @ConfigurationProperties("spring.datasource")
-    public DataSourceProperties pgDataSourceProperties() {
-        return new DataSourceProperties();
+    @Value("${spring.datasource1.database}")
+    private String database;
+    @Value("${spring.datasource1.username}")
+    private String username;
+    @Value("${spring.datasource1.url}")
+    private String url;
+    @Value("${spring.datasource1.password}")
+    private String password;
+    @Value("${spring.datasource1.port}")
+    private Integer port;
+    @Value("${spring.datasource1.schema}")
+    private String schema;
+
+    @Override
+    public ConnectionFactory connectionFactory() {
+        return new PostgresqlConnectionFactory(
+                PostgresqlConnectionConfiguration.builder()
+                        .schema(schema)
+                        .port(port)
+                        .host(url)
+                        .database(database)
+                        .username(username)
+                        .password(password).build()
+        );
     }
-
-    @Bean
-    @Primary
-    @ConfigurationProperties("spring.datasource.configuration")
-    public DataSource pgDataSource() {
-        return pgDataSourceProperties()
-                .initializeDataSourceBuilder()
-                .type(HikariDataSource.class)
-                .build();
-    }
-
-    @Primary
-    @Bean(name = "pgEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean pgEntityManagerFactory(EntityManagerFactoryBuilder builder) {
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("hibernate.hbm2ddl.auto", "create");
-        return builder
-                .dataSource(pgDataSource())
-                .packages("com.decentralizer.spreadr.database.postgres.entities")
-                .properties(properties)
-                .build();
-    }
-
-    @Primary
-    @Bean
-    public PlatformTransactionManager pgTransactionManager(
-            final @Qualifier("pgEntityManagerFactory") LocalContainerEntityManagerFactoryBean pgEntityManagerFactory) {
-        return new JpaTransactionManager(pgEntityManagerFactory.getObject());
-    }
-
 }

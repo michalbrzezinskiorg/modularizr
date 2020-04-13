@@ -1,16 +1,19 @@
 package com.decentralizer.spreadr.database.postgres;
 
-import com.decentralizer.spreadr.database.postgres.entities.RoleEntity;
+import com.decentralizer.spreadr.database.postgres.tables.RoleDBRow;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.UUID;
 
 @Repository
 @Transactional
-interface RolesRepository extends JpaRepository<RoleEntity, UUID> {
-    List<Role> findByUsers_id(UUID userId);
+interface RolesRepository extends R2dbcRepository<RoleDBRow, UUID>{
+
+    @Query("select * from roles r, users u, user_role ur where ur.user_id = u.id and r.id = ur.role_id and u.id like :userId")
+    Flux<Role> findByUsers_id(UUID userId);
 }

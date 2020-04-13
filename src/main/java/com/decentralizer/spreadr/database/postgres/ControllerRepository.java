@@ -1,35 +1,14 @@
 package com.decentralizer.spreadr.database.postgres;
 
-import com.decentralizer.spreadr.database.postgres.entities.ControllerEntity;
-import com.decentralizer.spreadr.database.postgres.entities.PermissionEntity;
-import com.decentralizer.spreadr.database.postgres.entities.RoleEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import com.decentralizer.spreadr.database.postgres.tables.ControllerDBRow;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Repository
 @Transactional
-interface ControllerRepository extends JpaRepository<ControllerEntity, UUID> {
+interface ControllerRepository extends R2dbcRepository<ControllerDBRow, UUID> {
 
-    List<ControllerEntity> findAll();
-
-    Page<ControllerEntity> findAll(Pageable pageable);
-
-    Set<ControllerEntity> findByRoles(RoleEntity role);
-
-    Set<ControllerEntity> findByPermissions(PermissionEntity permission);
-
-    ControllerEntity findByController(String controller);
-
-    ControllerEntity findById(int id);
-
-    @Query("select c from ControllerEntity c order by c.controller asc")
-    Page<ControllerEntity> findDistinctOrderByControllerAsc(Pageable pageable);
 }

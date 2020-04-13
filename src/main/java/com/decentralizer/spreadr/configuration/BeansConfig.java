@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -15,6 +16,7 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @Slf4j
 @Configuration
 @EnableScheduling
+@EnableR2dbcRepositories
 class BeansConfig {
 
     @Bean

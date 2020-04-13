@@ -11,9 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Set;
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -24,7 +25,7 @@ class AppconfigService {
     private final AppconfigPostgresPort appconfigPostgresPort;
     private final ApplicationEventsPublisher applicationEventsPublisher;
 
-    public Set<Controller> findAllControllers() {
+    public Flux<Controller> findAllControllers() {
         return appconfigPostgresPort.findAllControllers();
     }
 
@@ -36,21 +37,21 @@ class AppconfigService {
             log.info("trying to persist [{}] seems to be duplicate", controller);
     }
 
-    public User getUserByLogin(String login) {
+    public Mono<User> getUserByLogin(String login) {
         return appconfigPostgresPort.findUserByLogin(login);
     }
 
-    public List<Role> findRolesByUser(@PathVariable("id") UUID userId) {
+    public Flux<Role> findRolesByUser(@PathVariable("id") UUID userId) {
         return appconfigPostgresPort.findRolesByUser(userId);
     }
 
-    public List<Permission> findByPermissionFor(@PathVariable("id") UUID userId) {
+    public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId) {
         return appconfigPostgresPort.findByPermissionFor(userId);
     }
 
     public void createUser(User user) {
-        User existing = appconfigPostgresPort.findUserByLogin(user.getLogin());
-        if (existing == null)
+        Mono<User> existing = appconfigPostgresPort.findUserByLogin(user.getLogin());
+        if (existing.retryBackoff(3, Duration.ofSeconds(5)).blockOptional().isEmpty())
             applicationEventsPublisher.publish(new UserAccountCreated(user));
         else
             log.info("skipped creation existing user [{}]", user);

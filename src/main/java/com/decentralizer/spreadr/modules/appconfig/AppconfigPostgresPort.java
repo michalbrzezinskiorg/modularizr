@@ -4,6 +4,8 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Set;
@@ -11,21 +13,21 @@ import java.util.UUID;
 
 public interface AppconfigPostgresPort {
 
-    User save(User user);
+    Mono<User> save(User user);
 
-    Set<Controller> findAllControllers();
+    Flux<Controller> findAllControllers();
 
     void addNewControllerToDatabase(Controller controller);
 
-    User findUserByLogin(String login);
+    Mono<User> findUserByLogin(String login);
 
-    List<Role> findRolesByUser(UUID userId);
+    Flux<Role> findRolesByUser(UUID userId);
 
-    List<Permission> findByPermissionFor(UUID userId);
+    Flux<Permission> findByPermissionFor(UUID userId);
 
     void removeControllerFromDatabase(Controller controller);
 
-    Controller findControllerById(String id);
+    Mono<Controller> findControllerById(String id);
 
     boolean existsControllerById(Controller controller);
 }

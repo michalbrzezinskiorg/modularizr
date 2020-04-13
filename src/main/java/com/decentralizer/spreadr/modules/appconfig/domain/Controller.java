@@ -1,7 +1,7 @@
 package com.decentralizer.spreadr.modules.appconfig.domain;
 
-import com.decentralizer.spreadr.database.postgres.entities.PermissionEntity;
-import com.decentralizer.spreadr.database.postgres.entities.RoleEntity;
+import com.decentralizer.spreadr.database.postgres.tables.PermissionDBRow;
+import com.decentralizer.spreadr.database.postgres.tables.RoleDBRow;
 import lombok.Data;
 
 import java.util.Set;
@@ -13,8 +13,8 @@ public class Controller {
     private String controller;
     private String method;
     private String httpMethod;
-    private Set<RoleEntity> roles;
-    private Set<PermissionEntity> permissions;
+    private Set<RoleDBRow> roles;
+    private Set<PermissionDBRow> permissions;
     private boolean active;
     private UUID version;
 

@@ -1,7 +1,7 @@
 package com.decentralizer.spreadr.apigateway.domain;
 
-import com.decentralizer.spreadr.database.postgres.entities.ControllerEntity;
-import com.decentralizer.spreadr.database.postgres.entities.UserEntity;
+import com.decentralizer.spreadr.database.postgres.tables.ControllerDBRow;
+import com.decentralizer.spreadr.database.postgres.tables.UserDBRow;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
@@ -15,8 +15,8 @@ public class PermissionGatewayDTO {
     private ZonedDateTime fromDate;
     private ZonedDateTime toDate;
     private boolean active;
-    private UserEntity createdBy;
-    private UserEntity permissionFor;
-    private Set<ControllerEntity> controllers = new HashSet<>();
+    private UserDBRow createdBy;
+    private UserDBRow permissionFor;
+    private Set<ControllerDBRow> controllers = new HashSet<>();
     private UUID version;
 }
