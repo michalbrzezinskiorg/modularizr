@@ -1,7 +1,7 @@
 # Getting Started
 
 ### Reference Documentation
-For further reference, please consider the following sections:
+R2DBC reactive SPRING BOOT project - modular monolith, CQRS with KAFKA, MYSQL, POSTGRES.
 
 * [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
 * [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.2.2.RELEASE/maven-plugin/)

@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;

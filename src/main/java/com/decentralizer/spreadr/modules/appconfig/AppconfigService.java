@@ -34,7 +34,7 @@ class AppconfigService {
         if (!exists)
             applicationEventsPublisher.publish(new NewControllerFound(controller, false));
         else
-            log.info("trying to persist [{}] seems to be duplicate", controller);
+            log.warn("trying to persist [{}] seems to be duplicate", controller);
     }
 
     public Mono<User> getUserByLogin(String login) {
@@ -54,6 +54,6 @@ class AppconfigService {
         if (existing.retryBackoff(3, Duration.ofSeconds(5)).blockOptional().isEmpty())
             applicationEventsPublisher.publish(new UserAccountCreated(user));
         else
-            log.info("skipped creation existing user [{}]", user);
+            log.warn("user already exists // skipped creation existing user [{}]", user);
     }
 }
