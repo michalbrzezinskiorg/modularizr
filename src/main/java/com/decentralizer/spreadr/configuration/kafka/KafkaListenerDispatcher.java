@@ -10,6 +10,8 @@ import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
+
 import static com.decentralizer.spreadr.SpreadrApplication.APPLICATION_LINEAR_HISTORY_KAFKA_TOPIC;
 
 @Component
@@ -22,16 +24,19 @@ public class KafkaListenerDispatcher {
 
     @KafkaHandler
     public void listen(UserLoggedInEvent message) {
+        message.setPublished(ZonedDateTime.now());
         appconfigEventsListener.handleMessage(message);
     }
 
     @KafkaHandler
     public void listen(UserAccountCreated message) {
+        message.setPublished(ZonedDateTime.now());
         appconfigEventsListener.handleMessage(message);
     }
 
     @KafkaHandler
     public void listen(NewControllerFound message) {
+        message.setPublished(ZonedDateTime.now());
         appconfigEventsListener.handleMessage(message);
     }
 

@@ -31,7 +31,7 @@ class AppconfigService {
     public void addNewControllerToDatabase(Controller controller) {
         boolean exists = appconfigPostgresPort.existsControllerById(controller);
         if (!exists)
-            applicationEventsPublisher.publish(new NewControllerFound(controller, false));
+            applicationEventsPublisher.publish(new NewControllerFound(controller));
         else
             log.warn("trying to persist [{}] seems to be duplicate", controller);
     }
