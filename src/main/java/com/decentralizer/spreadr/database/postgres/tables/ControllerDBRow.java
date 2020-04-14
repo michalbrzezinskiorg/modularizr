@@ -13,7 +13,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Table("docker.controllers")
-public class ControllerDBRow  implements Persistable<UUID> {
+public class ControllerDBRow implements Persistable<UUID> {
 
     @Id
     private UUID id;

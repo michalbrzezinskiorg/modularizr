@@ -3,7 +3,7 @@ package com.decentralizer.spreadr.apigateway.domain;
 import com.decentralizer.spreadr.database.postgres.tables.UserProfileDBRow;
 import lombok.Data;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -19,11 +19,13 @@ public class UserGatewayDTO {
     private String login;
     private boolean active;
     private boolean enabled;
-    private ZonedDateTime created;
-    private ZonedDateTime lastLogged;
-    private ZonedDateTime activated;
-    private ZonedDateTime passwordChanged;
+    private LocalDateTime created;
+    private LocalDateTime lastLogged;
+    private LocalDateTime activated;
+    private LocalDateTime passwordChanged;
     private Set<PermissionGatewayDTO> hadCreatedPrermissions = new HashSet<>();
     private Set<PermissionGatewayDTO> permissions = new HashSet<>();
     private Set<RoleGatewayDTO> roleGatewayDTOS = new HashSet<>();
+
+
 }

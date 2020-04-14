@@ -43,7 +43,7 @@ class AppConfigClient {
                 .exchange()
                 .map(r -> r == null ? new RuntimeException() : r)
                 .flatMap(m -> ((ClientResponse) m).bodyToMono(UserGatewayDTO.class))
-                .retryBackoff(5, Duration.ofSeconds(1));
+                .retryBackoff(1, Duration.ofSeconds(1));
     }
 
     public Flux<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
@@ -80,11 +80,10 @@ class AppConfigClient {
                 .header("instance", INSTANCE_ID)
                 .bodyValue(c)
                 .retrieve().toBodilessEntity()
-                .doFirst(() -> log.info("addNewControllerToDatabase before [{}]", c))
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
                 .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
-                .retryBackoff(5, Duration.ofSeconds(10))
-                .delaySubscription(Duration.ofSeconds(10))
+                .retryBackoff(1, Duration.ofSeconds(1))
+                .delaySubscription(Duration.ofSeconds(1))
                 .subscribe();
     }
 
@@ -93,9 +92,8 @@ class AppConfigClient {
                 .post()
                 .uri(applicationUri + "/application/users")
                 .header("instance", INSTANCE_ID)
-                .bodyValue(userGatewayDTO)
                 .retrieve()
-                .toEntity(UserGatewayDTO.class)
+                .toBodilessEntity()
                 .doFirst(() -> log.info("addNewControllerToDatabase before [{}]", userGatewayDTO))
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
                 .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))

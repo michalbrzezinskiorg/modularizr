@@ -48,11 +48,11 @@ class AppconfigService {
         return appconfigPostgresPort.findByPermissionFor(userId);
     }
 
-    public void createUser(User user) {
-        Mono<User> existing = appconfigPostgresPort.findUserByLogin(user.getLogin());
-        log.info("existing user [{}]", existing);
-        existing.subscribe(
-                u -> u.setActive(false),
-                u -> applicationEventsPublisher.publish(new UserAccountCreated(user)));
+    public Mono<Void> createUser(User user) {
+        Mono<User> userByLogin = appconfigPostgresPort.findUserByLogin(user.getLogin());
+        return userByLogin
+                .filter(r -> r == null)
+                .doFinally(u -> applicationEventsPublisher.publish(new UserAccountCreated(user)))
+                .then(Mono.empty());
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -46,13 +46,15 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
     }
 
     private Mono<UserGatewayDTO> getUser(Authentication authentication) {
+        log.info("getUser");
         String login = authentication.getName();
         String password = authentication.getCredentials().toString();
-        return appConfigClient.getUserByLogin(login)
-                .switchIfEmpty(createUserAccount(login, password));
+        Mono<UserGatewayDTO> userByLogin = appConfigClient.getUserByLogin(login);
+        return userByLogin.switchIfEmpty(Mono.defer(() -> createUserAccount(login, password)));
     }
 
     private Mono<UserGatewayDTO> createUserAccount(String login, String password) {
+        log.info("createUserAccount");
         UserGatewayDTO userGatewayDTO = new UserGatewayDTO();
         userGatewayDTO.setLogin(login);
         userGatewayDTO.setPassword(password);
@@ -60,20 +62,27 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
     }
 
     private void authenticateUser(String password, Mono<UserGatewayDTO> user) {
+        log.info("authenticateUser [{}]", user);
         Optional<UserGatewayDTO> userGatewayDTO = user.blockOptional();
+        checkIfIsEnabled(userGatewayDTO);
         if (userGatewayDTO.isEmpty()) {
             log.info(COULD_NOT_CREATE);
             throw new BadCredentialsException(COULD_NOT_CREATE);
-        } else if (userGatewayDTO.get().isEnabled()) {
+        } else if (!userGatewayDTO.get().isEnabled()) {
             log.info(DISABLED);
             throw new BadCredentialsException(DISABLED);
-        } else if (userGatewayDTO.get().getActivated() == null || userGatewayDTO.get().getActivated().isAfter(ZonedDateTime.now())) {
+        } else if (userGatewayDTO.get().getActivated() == null || userGatewayDTO.get().getActivated().isAfter(LocalDateTime.now())) {
             log.info(CONFIRM_EMAIL);
             throw new BadCredentialsException(CONFIRM_EMAIL);
         } else if (!passwordEncoder.matches(password, userGatewayDTO.get().getPassword())) {
             log.info(WRONG);
             throw new BadCredentialsException(WRONG);
         }
+    }
+
+    private void checkIfIsEnabled(Optional<UserGatewayDTO> userGatewayDTO) {
+        // TODO: implement some sort of more advanced logic
+        userGatewayDTO.ifPresent(u -> u.setEnabled(u.isActive()));
     }
 
     private void setPermissions(Mono<UserGatewayDTO> user, Set<Authority> authorities) {

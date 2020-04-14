@@ -9,10 +9,10 @@ import java.util.UUID;
 
 @Data
 public class RoleGatewayDTO {
-    private int id;
-    private String name;
     private final Set<ControllerGatewayDTO> controllerGatewayDTOS = new HashSet<>();
     private final Set<UserGatewayDTO> userGatewayDTOS = new HashSet<>();
+    private int id;
+    private String name;
     private boolean active;
     private LocalDateTime created;
     private LocalDateTime edited;

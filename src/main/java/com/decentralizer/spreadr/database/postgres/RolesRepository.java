@@ -12,8 +12,8 @@ import java.util.UUID;
 
 @Repository
 @Transactional
-interface RolesRepository extends R2dbcRepository<RoleDBRow, UUID>{
+interface RolesRepository extends R2dbcRepository<RoleDBRow, UUID> {
 
-    @Query("select * from docker.roles r, docker.users u, docker.user_role ur where ur.user_id = u.id and r.id = ur.role_id and u.id like :userId")
+    @Query("select * from docker.roles r, docker.user u, docker.user_role ur where ur.user_id = u.id and r.id = ur.role_id and u.id = :userId")
     Flux<Role> findByUsers_id(UUID userId);
 }

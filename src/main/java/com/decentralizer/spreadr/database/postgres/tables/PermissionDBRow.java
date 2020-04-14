@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Data
 @Table("docker.permissions")
-public class PermissionDBRow   implements Persistable<UUID> {
+public class PermissionDBRow implements Persistable<UUID> {
 
     @Id
     private UUID id;

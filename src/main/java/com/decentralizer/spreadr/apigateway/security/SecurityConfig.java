@@ -23,9 +23,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
     public static final String WEBSOCKET = "/messages/**";
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private static final String LOGOUT = "/users/logout";
     private static final String EXCEPTION = "/error";
     private static final String POST_USERS_INTERNAL = "/application/users";
@@ -103,7 +102,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private void csrf(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().ignoringAntMatchers(PUBLIC_PLACES)
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
     }
 
     private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry

@@ -26,14 +26,13 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @RequiredArgsConstructor
 class SpringControllersForSecurity {
 
-    private final AppConfigClient appConfigClient;
-    private final HashSet<AnnotatedController> controllers = new HashSet<>();
-
     private static final String GET = "GET";
     private static final String POST = "POST";
     private static final String DELETE = "DELETE";
     private static final String PUT = "PUT";
     private static final String PATCH = "PATCH";
+    private final AppConfigClient appConfigClient;
+    private final HashSet<AnnotatedController> controllers = new HashSet<>();
 
     @PostConstruct
     public void postConstruct() {

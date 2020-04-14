@@ -16,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.ZonedDateTime;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -36,7 +37,7 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     public Mono<User> save(User user) {
         UserDBRow entity = modelMapper.map(user, UserDBRow.class);
         entity.setPasswordEncrypted(passwordEncoder.encode(user.getPassword()));
-        entity.setPasswordChanged(ZonedDateTime.now());
+        entity.setPasswordChanged(LocalDateTime.now());
         entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
         return userRepository.save(entity)
                 .doFirst(() -> log.info("save(User user) saving [{}]", entity))
@@ -60,7 +61,10 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public Mono<User> findUserByLogin(String login) {
-        return userRepository.getByLogin(login).map(a -> modelMapper.map(a, User.class));
+        return userRepository.getByLogin(login)
+                .retryBackoff(3, Duration.ofSeconds(1))
+                .doOnError(e -> log.error(e.getMessage()))
+                .map(a -> modelMapper.map(a, User.class));
     }
 
     @Override
@@ -70,8 +74,7 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public Flux<Permission> findByPermissionFor(UUID userId) {
-        return permissionRepository.findByPermissionFor(
-                userRepository.findById(userId))
+        return permissionRepository.findByPermissionFor(userId)
                 .map(a -> modelMapper.map(a, Permission.class));
     }
 

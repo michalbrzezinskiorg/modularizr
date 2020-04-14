@@ -1,4 +1,3 @@
-
 package com.decentralizer.spreadr.database.mysql.entities;
 
 import lombok.Data;

@@ -66,7 +66,7 @@ class BeansConfig {
                     .headers()
                     .forEach((name, values) ->
                             values.forEach(value ->
-                                    log.info("sending request with header ::: {} : [{}]", name, value)));
+                                    log.info(" ===> header ::: {} : [{}]", name, value)));
             return Mono.just(clientRequest);
         });
     }

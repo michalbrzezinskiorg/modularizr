@@ -5,6 +5,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -17,6 +18,7 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @RestController
 @RequestMapping("application")
 @RequiredArgsConstructor
+@Slf4j
 public class AppconfigController {
 
     private final AppconfigService appconfigService;
@@ -36,25 +38,28 @@ public class AppconfigController {
     @GetMapping("user/{login}")
     public Mono<User> getUserByLogin(@PathVariable String login, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        return appconfigService.getUserByLogin(login);
+        Mono<User> userByLogin = appconfigService.getUserByLogin(login);
+        return userByLogin;
     }
 
     @GetMapping("user/{id}/roles")
     public Flux<Role> findRolesByUser(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        return appconfigService.findRolesByUser(userId);
+        Flux<Role> rolesByUser = appconfigService.findRolesByUser(userId);
+        return rolesByUser;
     }
 
     @GetMapping("user/{id}/permissions")
     public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        return appconfigService.findByPermissionFor(userId);
+        Flux<Permission> byPermissionFor = appconfigService.findByPermissionFor(userId);
+        return byPermissionFor;
     }
 
     @PostMapping("users")
-    public void createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
+    public Mono<Void> createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        appconfigService.createUser(user);
+        return appconfigService.createUser(user);
     }
 
     private void internalSecurity(String instance) {
