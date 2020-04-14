@@ -5,13 +5,13 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
+import javax.persistence.Id;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
-@Table("user")
+@Table("docker.user")
 public class UserDBRow   implements Persistable<UUID> {
     @Id
     private UUID id;

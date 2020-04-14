@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
-@Table("permissions")
+@Table("docker.permissions")
 public class PermissionDBRow   implements Persistable<UUID> {
 
     @Id

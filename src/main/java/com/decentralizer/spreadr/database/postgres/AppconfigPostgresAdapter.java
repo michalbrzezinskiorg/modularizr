@@ -8,6 +8,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     private final UserRepository userRepository;
@@ -36,7 +38,12 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
         entity.setPasswordEncrypted(passwordEncoder.encode(user.getPassword()));
         entity.setPasswordChanged(ZonedDateTime.now());
         entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
-        return userRepository.save(entity).map(a -> modelMapper.map(a, User.class));
+        log.info("save(User user) saving [{}]", entity);
+        Mono<UserDBRow> save = userRepository.save(entity);
+        save.subscribe(s -> log.info("save(User user) saved [{}]", s));
+        Mono<User> map = save.map(a -> modelMapper.map(a, User.class));
+        map.subscribe(s -> log.info("saved [{}]", s));
+        return map;
     }
 
     @Override

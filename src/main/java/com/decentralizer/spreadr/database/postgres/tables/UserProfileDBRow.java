@@ -4,12 +4,12 @@ import lombok.Data;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
+import javax.persistence.Id;
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @Data
-@Table("userprofile")
+@Table("docker.userprofile")
 public class UserProfileDBRow implements Persistable<UUID> {
 
     @Id

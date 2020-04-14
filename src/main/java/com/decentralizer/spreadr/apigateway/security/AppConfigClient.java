@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,11 +37,13 @@ class AppConfigClient {
     }
 
     public Mono<UserGatewayDTO> getUserByLogin(String login) {
-        return Mono.from(webClient.get()
+        return webClient.get()
                 .uri(applicationUri + "/application/user/" + login)
                 .header("instance", INSTANCE_ID)
-                .retrieve()
-                .bodyToFlux(UserGatewayDTO.class));
+                .exchange()
+                .map(r -> r == null ? new RuntimeException() : r)
+                .flatMap(m -> ((ClientResponse) m).bodyToMono(UserGatewayDTO.class))
+                .retryBackoff(5, Duration.ofSeconds(1));
     }
 
     public Flux<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
@@ -93,12 +96,11 @@ class AppConfigClient {
                 .bodyValue(userGatewayDTO)
                 .retrieve()
                 .toEntity(UserGatewayDTO.class)
-                .doFirst(() -> log.info("addNewControllerToDatabase before"))
+                .doFirst(() -> log.info("addNewControllerToDatabase before [{}]", userGatewayDTO))
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
                 .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
                 .retryBackoff(5, Duration.ofSeconds(10))
-                .filter(r -> r.getBody() != null)
-                .map(r -> r.getBody());
+                .then(getUserByLogin(userGatewayDTO.getLogin()));
     }
 
 }

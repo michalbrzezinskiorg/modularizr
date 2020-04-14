@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-@Table("controllers")
+@Table("docker.controllers")
 public class ControllerDBRow  implements Persistable<UUID> {
 
     @Id

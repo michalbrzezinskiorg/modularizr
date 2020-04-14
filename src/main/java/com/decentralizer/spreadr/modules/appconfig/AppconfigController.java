@@ -52,10 +52,9 @@ public class AppconfigController {
     }
 
     @PostMapping("users")
-    public Mono<User> createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
+    public void createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
         appconfigService.createUser(user);
-        return appconfigService.getUserByLogin(user.getLogin());
     }
 
     private void internalSecurity(String instance) {

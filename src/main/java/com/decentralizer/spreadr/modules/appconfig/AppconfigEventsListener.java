@@ -17,14 +17,17 @@ class AppconfigEventsListener {
     private final AppconfigPostgresPort postgresPort;
 
     public void handleMessage(UserLoggedInEvent message) {
+        log.info("AppconfigEventsListener handleMessage [{}]", message);
         postgresPort.save(message.getUser());
     }
 
     public void handleMessage(UserAccountCreated message) {
+        log.info("AppconfigEventsListener handleMessage [{}]", message);
         postgresPort.save(message.getUser());
     }
 
     public void handleMessage(NewControllerFound message) {
+        log.info("AppconfigEventsListener handleMessage [{}]", message);
         if (message.isCompensation()) {
             handleCompensation(message.getController());
         } else {

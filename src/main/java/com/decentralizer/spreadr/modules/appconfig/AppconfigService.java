@@ -51,6 +51,7 @@ class AppconfigService {
 
     public void createUser(User user) {
         Mono<User> existing = appconfigPostgresPort.findUserByLogin(user.getLogin());
+        log.info("existing user [{}]", existing);
         if (existing.retryBackoff(3, Duration.ofSeconds(5)).blockOptional().isEmpty())
             applicationEventsPublisher.publish(new UserAccountCreated(user));
         else
