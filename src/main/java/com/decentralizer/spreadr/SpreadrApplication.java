@@ -2,7 +2,6 @@ package com.decentralizer.spreadr;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import reactor.blockhound.BlockHound;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.time.ZonedDateTime;
@@ -25,7 +24,7 @@ public class SpreadrApplication {
                                 .getBytes()
                 );
 
-        BlockHound.install();
+        //BlockHound.install();
     }
 
     public static void main(String[] args) {

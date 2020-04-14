@@ -15,3 +15,4 @@ spreadr.iml
 target/
 /src/test/test.iml
 /src/main/main.iml
+/.vscode/

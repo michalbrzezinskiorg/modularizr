@@ -91,11 +91,14 @@ class AppConfigClient {
                 .uri(applicationUri + "/application/users")
                 .header("instance", INSTANCE_ID)
                 .bodyValue(userGatewayDTO)
-                .retrieve().toEntity(UserGatewayDTO.class)
+                .retrieve()
+                .toEntity(UserGatewayDTO.class)
                 .doFirst(() -> log.info("addNewControllerToDatabase before"))
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
                 .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
                 .retryBackoff(5, Duration.ofSeconds(10))
+                .filter(r -> r.getBody() != null)
                 .map(r -> r.getBody());
     }
+
 }
