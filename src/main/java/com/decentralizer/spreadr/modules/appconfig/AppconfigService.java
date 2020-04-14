@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -52,9 +51,8 @@ class AppconfigService {
     public void createUser(User user) {
         Mono<User> existing = appconfigPostgresPort.findUserByLogin(user.getLogin());
         log.info("existing user [{}]", existing);
-        if (existing.retryBackoff(3, Duration.ofSeconds(5)).blockOptional().isEmpty())
-            applicationEventsPublisher.publish(new UserAccountCreated(user));
-        else
-            log.warn("user already exists // skipped creation existing user [{}]", user);
+        existing.subscribe(
+                u -> u.setActive(false),
+                u -> applicationEventsPublisher.publish(new UserAccountCreated(user)));
     }
 }

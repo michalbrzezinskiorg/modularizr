@@ -38,12 +38,10 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
         entity.setPasswordEncrypted(passwordEncoder.encode(user.getPassword()));
         entity.setPasswordChanged(ZonedDateTime.now());
         entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
-        log.info("save(User user) saving [{}]", entity);
-        Mono<UserDBRow> save = userRepository.save(entity);
-        save.subscribe(s -> log.info("save(User user) saved [{}]", s));
-        Mono<User> map = save.map(a -> modelMapper.map(a, User.class));
-        map.subscribe(s -> log.info("saved [{}]", s));
-        return map;
+        return userRepository.save(entity)
+                .doFirst(() -> log.info("save(User user) saving [{}]", entity))
+                .doOnError(e -> log.error(e.getMessage()))
+                .map(a -> modelMapper.map(a, User.class));
     }
 
     @Override
@@ -79,13 +77,15 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     @Override
     public void removeControllerFromDatabase(Controller controller) {
-        controllerRepository.delete(modelMapper.map(controller, ControllerDBRow.class));
+        controllerRepository.delete(modelMapper.map(controller, ControllerDBRow.class))
+                .doOnError(e -> log.info(e.getMessage())).subscribe();
     }
 
     @Override
     public Mono<Controller> findControllerById(String id) {
         return controllerRepository
                 .findById(UUID.nameUUIDFromBytes(id.getBytes()))
+                .doOnError(e -> log.info(e.getMessage()))
                 .map(v -> modelMapper.map(v, Controller.class));
     }
 
