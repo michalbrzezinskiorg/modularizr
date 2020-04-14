@@ -13,9 +13,6 @@ import reactor.core.publisher.Mono;
 @Transactional
 interface PermissionRepository extends R2dbcRepository<PermissionDBRow, Long> {
 
-    @Query("select * from permissions, ")
-    Flux<PermissionDBRow> findByPermissionFor(UserDBRow u);
-
-    @Query("select * from ")
+    @Query("select * from docker.permissions p where p.permissionfor_id = :byId.id")
     Flux<PermissionDBRow> findByPermissionFor(Mono<UserDBRow> byId);
 }

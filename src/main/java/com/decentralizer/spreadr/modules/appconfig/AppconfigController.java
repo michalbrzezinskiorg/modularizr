@@ -60,7 +60,7 @@ public class AppconfigController {
 
     private void internalSecurity(String instance) {
         if (!INSTANCE_ID.equals(instance))
-            throw new AuthorizationServiceException("instance id " + instance);
+            throw new AuthorizationServiceException("incorrect instance id [" + instance + "]");
     }
 
 }

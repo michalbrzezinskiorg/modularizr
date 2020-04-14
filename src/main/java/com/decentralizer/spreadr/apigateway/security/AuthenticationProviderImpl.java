@@ -47,10 +47,9 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private Mono<UserGatewayDTO> getUser(Authentication authentication) {
         String login = authentication.getName();
-        Mono<UserGatewayDTO> user = appConfigClient.getUserByLogin(login)
-                .onErrorReturn(createUserAccount(login, authentication.getCredentials().toString()).block())
-                .switchIfEmpty(createUserAccount(login, authentication.getCredentials().toString()));
-        return user;
+        String password = authentication.getCredentials().toString();
+        return appConfigClient.getUserByLogin(login)
+                .switchIfEmpty(createUserAccount(login, password));
     }
 
     private Mono<UserGatewayDTO> createUserAccount(String login, String password) {
