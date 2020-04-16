@@ -1,17 +1,14 @@
 package com.decentralizer.spreadr.apigateway.security;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,12 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
-class SecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebFluxSecurity
+@Slf4j
+class SecurityConfig {
 
     public static final String WEBSOCKET = "/messages/**";
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private static final String LOGOUT = "/users/logout";
     private static final String EXCEPTION = "/error";
     private static final String POST_USERS_INTERNAL = "/application/users";
@@ -38,90 +35,68 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final SpringControllersForSecurity springControllersDiscovery;
     private final AuthenticationProviderImpl authenticationProvider;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public static String stringifyController(String getClassLevelAnnotation, String getMethodLevelAnnotation, String httpMethod) {
         String stringified = getClassLevelAnnotation.concat((getMethodLevelAnnotation.length() > 0 ? getMethodLevelAnnotation : ""));
         stringified = stringified.concat("$" + httpMethod);
-        logger.info("stringified controller: [{}]", stringified);
+        log.info("stringified controller: [{}]", stringified);
         return stringified;
     }
 
-    @Override
-    public void configure(HttpSecurity httpSecurity) throws Exception {
-        logger.info("configure(HttpSecurity [{}])", httpSecurity);
+    @Bean
+    public SecurityWebFilterChain configure(ServerHttpSecurity httpSecurity) throws Exception {
+        log.info("configure(HttpSecurity [{}])", httpSecurity);
         final List<String> publicPlacesAsList = Arrays.asList(PUBLIC_PLACES);
         List<String> nonPublicControllers = getNonPublicControllers(publicPlacesAsList);
-        var expr = init(httpSecurity);
-        setHttpSecurityForPublicPlaces(expr);
+        ServerHttpSecurity.AuthorizeExchangeSpec expr = setHttpSecurityForPublicPlaces(httpSecurity);
         setHttpSecurityForAuthorities(expr, nonPublicControllers);
         options(expr);
-        csrf(httpSecurity);
         finish(expr);
+        return httpSecurity.build();
     }
 
     private ArrayList<String> getNonPublicControllers(List<String> publicPlacesAsList) {
-        logger.info("getNonPublicControllers(List<String>  [{}]))", publicPlacesAsList);
+        log.info("getNonPublicControllers(List<String>  [{}]))", publicPlacesAsList);
         var result = springControllersDiscovery.getControllers().stream()
                 .map(c -> stringifyController(c.getClassLevelAnnotation(), c.getMethodLevelAnnotation(), c.getHttpMethod()))
                 .filter(c -> !publicPlacesAsList.contains(c)).distinct()
                 .collect(Collectors.toCollection(ArrayList::new));
-        publicPlacesAsList.forEach(c -> logger.info("publicPlace [{}]", c));
-        result.forEach(c -> logger.info("nonPublicController [{}]", c));
+        publicPlacesAsList.forEach(c -> log.info("publicPlace [{}]", c));
+        result.forEach(c -> log.info("nonPublicController [{}]", c));
         return result;
     }
 
-    private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
-    init(HttpSecurity httpSecurity) throws Exception {
-        logger.info("init(HttpSecurity  [{}]))", httpSecurity);
-        return httpSecurity
-                .headers().frameOptions().sameOrigin().and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .and()
-                .authorizeRequests();
-    }
-
-    private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
+    private ServerHttpSecurity.AuthorizeExchangeSpec
     setHttpSecurityForPublicPlaces(
-            ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expr) {
-        logger.info("setHttpSecurityForPublicPlaces");
-        return expr.antMatchers(SecurityConfig.PUBLIC_PLACES).permitAll();
+            ServerHttpSecurity expr) {
+        log.info("setHttpSecurityForPublicPlaces [{}]", PUBLIC_PLACES);
+        return expr.authorizeExchange().pathMatchers(SecurityConfig.PUBLIC_PLACES).permitAll();
     }
 
-    private ExpressionUrlAuthorizationConfigurer<?>.ExpressionInterceptUrlRegistry
-    options(ExpressionUrlAuthorizationConfigurer<?>.ExpressionInterceptUrlRegistry expr) {
-        logger.info("options");
-        return expr.antMatchers(HttpMethod.OPTIONS).permitAll();
+    private void options(ServerHttpSecurity.AuthorizeExchangeSpec expr) {
+        log.info("options");
+        expr.pathMatchers(HttpMethod.OPTIONS).permitAll();
     }
 
-    private void finish(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expr) throws Exception {
-        expr.anyRequest().authenticated()
-                .and().httpBasic()
-                .and().logout().invalidateHttpSession(true);
+    private void finish(ServerHttpSecurity.AuthorizeExchangeSpec expr) {
+        expr.anyExchange().authenticated()
+                .and().formLogin();
     }
 
-    private void csrf(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().ignoringAntMatchers(PUBLIC_PLACES)
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
-    }
-
-    private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
-    setHttpSecurityForAuthorities(final ExpressionUrlAuthorizationConfigurer<HttpSecurity>
-            .ExpressionInterceptUrlRegistry expr, List<String> nonPublicControllers) {
+    private void setHttpSecurityForAuthorities(final ServerHttpSecurity.AuthorizeExchangeSpec expr, List<String> nonPublicControllers) {
         nonPublicControllers.forEach(auth -> nonPublicController(expr, auth));
-        return expr;
     }
 
     private void nonPublicController(
-            ExpressionUrlAuthorizationConfigurer<HttpSecurity>
-                    .ExpressionInterceptUrlRegistry expr, String auth) {
+            ServerHttpSecurity.AuthorizeExchangeSpec expr, String auth) {
         HttpMethod httpMethod = getHttpMethodFromAuthority(auth);
         String local = auth.substring(0, auth.lastIndexOf("$"));
-        logger.info("setHttpSecurityForAuthorities httpMethod: [{}] local: [{}]", httpMethod, local);
+        log.info("setHttpSecurityForAuthorities httpMethod: [{}] local: [{}]", httpMethod, local);
         if (httpMethod != null)
-            expr.antMatchers(httpMethod, local).hasAuthority(auth);
+            expr.pathMatchers(httpMethod, local).hasAuthority(auth);
         else
-            logger.error("auth: [{}]", auth);
+            log.error("auth: [{}]", auth);
     }
 
     private HttpMethod getHttpMethodFromAuthority(String auth) {
@@ -129,16 +104,11 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
         HttpMethod r = null;
         if (index > 0) {
             String method = auth.substring(index + 1);
-            logger.info("auth [{}], HttpMethod [{}]", auth, r);
+            log.info("auth [{}], HttpMethod [{}]", auth, r);
             r = HttpMethod.valueOf(method);
         }
-        logger.info("auth [{}], HttpMethod [{}]", auth, r);
+        log.info("auth [{}], HttpMethod [{}]", auth, r);
         return r;
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(authenticationProvider);
     }
 
 }

@@ -1,12 +1,14 @@
 package com.decentralizer.spreadr.modules.appconfig;
 
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
+import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
 import com.decentralizer.spreadr.modules.appconfig.events.UserAccountCreated;
 import com.decentralizer.spreadr.modules.appconfig.events.UserLoggedInEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +20,11 @@ class AppconfigEventsListener {
 
     public void handleMessage(UserLoggedInEvent message) {
         log.info("AppconfigEventsListener handleMessage [{}]", message);
-        postgresPort.save(message.getUser()).subscribe();
+        Mono<User> userMono = postgresPort
+                .findUserByLogin(message.getUser().getLogin())
+                .switchIfEmpty(Mono.defer(() ->
+                        postgresPort.save(message.getUser())));
+        userMono.doOnError(e -> log.error("handleMessage found exception [{}]", e.getMessage())).subscribe();
     }
 
     public void handleMessage(UserAccountCreated message) {
