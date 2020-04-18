@@ -9,8 +9,8 @@ import java.util.UUID;
 
 @Data
 public class RoleGatewayDTO {
-    private final Set<ControllerGatewayDTO> controllerGatewayDTOS = new HashSet<>();
-    private final Set<UserGatewayDTO> userGatewayDTOS = new HashSet<>();
+    private final Set<ControllerGatewayDTO> controller = new HashSet<>();
+    private final Set<UserGatewayDTO> user = new HashSet<>();
     private int id;
     private String name;
     private boolean active;

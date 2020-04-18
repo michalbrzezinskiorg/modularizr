@@ -21,7 +21,7 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-class AppConfigClient {
+class SecurityAppConfigClient {
 
     private final WebClient webClient;
 

@@ -1,6 +1,5 @@
 package com.decentralizer.spreadr.apigateway.domain;
 
-import com.decentralizer.spreadr.database.postgres.tables.ControllerDBRow;
 import com.decentralizer.spreadr.database.postgres.tables.UserDBRow;
 import lombok.Data;
 
@@ -17,6 +16,6 @@ public class PermissionGatewayDTO {
     private boolean active;
     private UserDBRow createdBy;
     private UserDBRow permissionFor;
-    private Set<ControllerDBRow> controllers = new HashSet<>();
+    private Set<ControllerGatewayDTO> controllers = new HashSet<>();
     private UUID version;
 }

@@ -34,7 +34,7 @@ class SecurityConfig {
     private static final String[] PUBLIC_PLACES = {WEBSOCKET, POST_USERS_INTERNAL, CONTROLLERS_INTERNAL, USERS_INTERNAL, SWAGGER, LOGOUT, FILES_ONE, USERS_WHOAMI, H2, EXCEPTION};
 
     private final SpringControllersForSecurity springControllersDiscovery;
-    private final AuthenticationProviderImpl authenticationProvider;
+    private final SecurityUserDetailsService authenticationProvider;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public static String stringifyController(String getClassLevelAnnotation, String getMethodLevelAnnotation, String httpMethod) {

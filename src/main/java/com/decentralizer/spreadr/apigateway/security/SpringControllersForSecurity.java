@@ -31,7 +31,7 @@ class SpringControllersForSecurity {
     private static final String DELETE = "DELETE";
     private static final String PUT = "PUT";
     private static final String PATCH = "PATCH";
-    private final AppConfigClient appConfigClient;
+    private final SecurityAppConfigClient securityAppConfigClient;
     private final HashSet<AnnotatedController> controllers = new HashSet<>();
 
     @PostConstruct
@@ -48,7 +48,7 @@ class SpringControllersForSecurity {
     private void addNewControllersToDatabase() {
         controllers.stream()
                 .map(getAnnotatedControllerActionFunction())
-                .forEach(c -> appConfigClient.addNewControllerToDatabase(c, INSTANCE_ID));
+                .forEach(c -> securityAppConfigClient.addNewControllerToDatabase(c, INSTANCE_ID));
     }
 
     private Function<AnnotatedController, Controller> getAnnotatedControllerActionFunction() {
