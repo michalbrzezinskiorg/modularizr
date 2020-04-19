@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import java.util.ArrayList;
@@ -34,8 +33,6 @@ class SecurityConfig {
     private static final String[] PUBLIC_PLACES = {WEBSOCKET, POST_USERS_INTERNAL, CONTROLLERS_INTERNAL, USERS_INTERNAL, SWAGGER, LOGOUT, FILES_ONE, USERS_WHOAMI, H2, EXCEPTION};
 
     private final SpringControllersForSecurity springControllersDiscovery;
-    private final SecurityUserDetailsService authenticationProvider;
-    private final BCryptPasswordEncoder passwordEncoder;
 
     public static String stringifyController(String getClassLevelAnnotation, String getMethodLevelAnnotation, String httpMethod) {
         String stringified = getClassLevelAnnotation.concat((getMethodLevelAnnotation.length() > 0 ? getMethodLevelAnnotation : ""));

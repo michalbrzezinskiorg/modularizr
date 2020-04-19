@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,18 +31,34 @@ class SecurityUserDetailsService implements ReactiveUserDetailsService {
         Mono<UserGatewayDTO> userByLogin = client.getUserByLogin(username);
         Mono<Flux<RoleGatewayDTO>> roles = userByLogin.map(client::findRolesByUser);
         Mono<Flux<PermissionGatewayDTO>> permissions = userByLogin.map(client::findByPermissionFor);
-        Mono<List<Set<ControllerGatewayDTO>>> f = roles.flatMap(r -> r.collectList())
-                .map(a -> a.stream().map(b -> b.getController())
-                        .collect(Collectors.toList()));
-        Mono<List<Set<ControllerGatewayDTO>>> p = permissions.flatMap(r -> r.collectList())
-                .map(a -> a.stream().map(b -> b.getControllers())
-                        .collect((Collectors.toList())));
-        Flux<List<ControllerGatewayDTO>> map = Flux.concat(f, p)
-                .flatMap(s -> Flux.just(s.stream()
-                        .flatMap(a -> a.stream())
-                        .collect(Collectors.toList())));
-        Flux<UserDetails> r = map.zipWith(userByLogin).map(u -> buildUser(u));
+        Mono<List<Set<ControllerGatewayDTO>>> f = getControllersFromRoles(roles);
+        Mono<List<Set<ControllerGatewayDTO>>> p = getControllersFromPermissions(permissions);
+        Flux<List<ControllerGatewayDTO>> map = getControllersList(f, p);
+        Flux<UserDetails> r = joinStreams(userByLogin, map);
         return Mono.from(r);
+    }
+
+    private Mono<List<Set<ControllerGatewayDTO>>> getControllersFromRoles(Mono<Flux<RoleGatewayDTO>> roles) {
+        return roles.flatMap(Flux::collectList)
+                .map(a -> a.stream().map(RoleGatewayDTO::getController)
+                        .collect(Collectors.toList()));
+    }
+
+    private Mono<List<Set<ControllerGatewayDTO>>> getControllersFromPermissions(Mono<Flux<PermissionGatewayDTO>> permissions) {
+        return permissions.flatMap(Flux::collectList)
+                .map(a -> a.stream().map(PermissionGatewayDTO::getControllers)
+                        .collect((Collectors.toList())));
+    }
+
+    private Flux<List<ControllerGatewayDTO>> getControllersList(Mono<List<Set<ControllerGatewayDTO>>> f, Mono<List<Set<ControllerGatewayDTO>>> p) {
+        return Flux.concat(f, p)
+                .flatMap(s -> Flux.just(s.stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList())));
+    }
+
+    private Flux<UserDetails> joinStreams(Mono<UserGatewayDTO> userByLogin, Flux<List<ControllerGatewayDTO>> map) {
+        return map.zipWith(userByLogin).map(this::buildUser);
     }
 
     private UserDetails buildUser(Tuple2<List<ControllerGatewayDTO>, UserGatewayDTO> u) {
@@ -58,9 +75,7 @@ class SecurityUserDetailsService implements ReactiveUserDetailsService {
                 .map(c -> SecurityConfig.stringifyController(
                         c.getController(),
                         c.getMethod(),
-                        c.getHttpMethod()))
-                .collect(Collectors.toList())
-                .toArray(new String[0]);
+                        c.getHttpMethod())).toArray(String[]::new);
     }
 
 }

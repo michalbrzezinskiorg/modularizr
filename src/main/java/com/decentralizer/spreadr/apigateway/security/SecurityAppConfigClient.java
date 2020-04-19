@@ -23,6 +23,9 @@ import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 @Slf4j
 class SecurityAppConfigClient {
 
+    public static final String APPLICATION_USER = "/application/user/";
+    public static final String HEADER_NAME = "instance";
+    public static final String APPLICATION_CONTROLLERS = "/application/controllers/";
     private final WebClient webClient;
 
     @Value("${app.context.url}")
@@ -38,8 +41,8 @@ class SecurityAppConfigClient {
 
     public Mono<UserGatewayDTO> getUserByLogin(String login) {
         return webClient.get()
-                .uri(applicationUri + "/application/user/" + login)
-                .header("instance", INSTANCE_ID)
+                .uri(applicationUri + APPLICATION_USER + login)
+                .header(HEADER_NAME, INSTANCE_ID)
                 .exchange()
                 .map(r -> r == null ? new RuntimeException() : r)
                 .flatMap(m -> ((ClientResponse) m).bodyToMono(UserGatewayDTO.class))
@@ -49,8 +52,8 @@ class SecurityAppConfigClient {
     public Flux<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
         return webClient
                 .get()
-                .uri(applicationUri + "/application/user/" + user.getId() + "/permissions")
-                .header("instance", INSTANCE_ID)
+                .uri(applicationUri + APPLICATION_USER + user.getId() + "/permissions")
+                .header(HEADER_NAME, INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(PermissionGatewayDTO.class);
     }
@@ -58,26 +61,17 @@ class SecurityAppConfigClient {
     public Flux<RoleGatewayDTO> findRolesByUser(UserGatewayDTO user) {
         return webClient
                 .get()
-                .uri(applicationUri + "/application/user/" + user.getId() + "/roles")
-                .header("instance", INSTANCE_ID)
+                .uri(applicationUri + APPLICATION_USER + user.getId() + "/roles")
+                .header(HEADER_NAME, INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(RoleGatewayDTO.class);
-    }
-
-    public Flux<Controller> findAllControllers(String instanceId) {
-        return webClient
-                .get()
-                .uri(applicationUri + "/application/controllers/")
-                .header("instance", INSTANCE_ID)
-                .retrieve()
-                .bodyToFlux(Controller.class);
     }
 
     public void addNewControllerToDatabase(final Controller c, final String instanceId) {
         webClient
                 .post()
-                .uri(applicationUri + "/application/controllers/")
-                .header("instance", INSTANCE_ID)
+                .uri(applicationUri + APPLICATION_CONTROLLERS)
+                .header(HEADER_NAME, INSTANCE_ID)
                 .bodyValue(c)
                 .retrieve().toBodilessEntity()
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
@@ -85,20 +79,6 @@ class SecurityAppConfigClient {
                 .retryBackoff(1, Duration.ofSeconds(1))
                 .delaySubscription(Duration.ofSeconds(1))
                 .subscribe();
-    }
-
-    public Mono<UserGatewayDTO> createUserAcount(UserGatewayDTO userGatewayDTO) {
-        return webClient
-                .post()
-                .uri(applicationUri + "/application/users")
-                .header("instance", INSTANCE_ID)
-                .retrieve()
-                .toBodilessEntity()
-                .doFirst(() -> log.info("addNewControllerToDatabase before [{}]", userGatewayDTO))
-                .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
-                .doOnSuccess(s -> log.info("addNewControllerToDatabase success [{}]", s))
-                .retryBackoff(5, Duration.ofSeconds(10))
-                .then(getUserByLogin(userGatewayDTO.getLogin()));
     }
 
 }

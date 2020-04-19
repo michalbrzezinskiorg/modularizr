@@ -31,6 +31,7 @@ class SpringControllersForSecurity {
     private static final String DELETE = "DELETE";
     private static final String PUT = "PUT";
     private static final String PATCH = "PATCH";
+    public static final String BASE_PACKAGE = "com.decentralizer.spreadr";
     private final SecurityAppConfigClient securityAppConfigClient;
     private final HashSet<AnnotatedController> controllers = new HashSet<>();
 
@@ -70,8 +71,7 @@ class SpringControllersForSecurity {
     private void addRequestMappingAnnotatedClassesToControllers(List<Class> classes) {
         if (classes != null) {
             for (Class parsedClass : classes) {
-                Annotation[] annotations = null;
-                annotations = getAnnotations(parsedClass, annotations);
+                Annotation[] annotations = getAnnotations(parsedClass);
                 if (annotations != null) {
                     for (Annotation annotation : annotations) {
                         if (annotation.annotationType() == RequestMapping.class) {
@@ -137,21 +137,22 @@ class SpringControllersForSecurity {
 
     private List<Class> findControllers(ClassPathScanningCandidateComponentProvider scanner) {
         List<Class> classes = new ArrayList<>();
-        for (BeanDefinition beanDefinition : scanner.findCandidateComponents("com.decentralizer.spreadr")) {
+        for (BeanDefinition beanDefinition : scanner.findCandidateComponents(BASE_PACKAGE)) {
             try {
                 classes.add(Class.forName(beanDefinition.getBeanClassName()));
             } catch (ClassNotFoundException e) {
-                log.info("class not found: [{}]", e);
+                log.error("class not found: [{}]", e.getMessage());
             }
         }
         return classes;
     }
 
-    private Annotation[] getAnnotations(Class parsedClass, Annotation[] annotations) {
+    private Annotation[] getAnnotations(Class parsedClass) {
+        Annotation[] annotations = null;
         try {
             annotations = parsedClass.getAnnotationsByType(Class.forName(RequestMapping.class.getCanonicalName()));
         } catch (ClassNotFoundException e) {
-            log.error("error: [{}]", e);
+            log.error("error: [{}]", e.getMessage());
         }
         return annotations;
     }
