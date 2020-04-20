@@ -23,6 +23,30 @@ public class AppconfigController {
 
     private final AppconfigService appconfigService;
 
+    @GetMapping("user/{login}")
+    public Mono<User> getUserByLogin(@PathVariable String login, @RequestHeader("instance") String instance) {
+        internalSecurity(instance);
+        return appconfigService.getUserByLogin(login);
+    }
+
+    @PostMapping("users")
+    public Mono<Void> createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
+        internalSecurity(instance);
+        return appconfigService.createUser(user);
+    }
+
+    @GetMapping("user/{id}/roles")
+    public Flux<Role> findRolesByUser(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
+        internalSecurity(instance);
+        return appconfigService.findRolesByUser(userId);
+    }
+
+    @GetMapping("user/{id}/permissions")
+    public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
+        internalSecurity(instance);
+        return appconfigService.findByPermissionFor(userId);
+    }
+
     @GetMapping("controllers")
     public Flux<Controller> findAllControllers(@RequestHeader("instance") String instance) {
         internalSecurity(instance);
@@ -33,33 +57,6 @@ public class AppconfigController {
     public void addNewControllerToDatabase(@RequestBody Controller controller, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
         appconfigService.addNewControllerToDatabase(controller);
-    }
-
-    @GetMapping("user/{login}")
-    public Mono<User> getUserByLogin(@PathVariable String login, @RequestHeader("instance") String instance) {
-        internalSecurity(instance);
-        Mono<User> userByLogin = appconfigService.getUserByLogin(login);
-        return userByLogin;
-    }
-
-    @GetMapping("user/{id}/roles")
-    public Flux<Role> findRolesByUser(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
-        internalSecurity(instance);
-        Flux<Role> rolesByUser = appconfigService.findRolesByUser(userId);
-        return rolesByUser;
-    }
-
-    @GetMapping("user/{id}/permissions")
-    public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
-        internalSecurity(instance);
-        Flux<Permission> byPermissionFor = appconfigService.findByPermissionFor(userId);
-        return byPermissionFor;
-    }
-
-    @PostMapping("users")
-    public Mono<Void> createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
-        internalSecurity(instance);
-        return appconfigService.createUser(user);
     }
 
     private void internalSecurity(String instance) {

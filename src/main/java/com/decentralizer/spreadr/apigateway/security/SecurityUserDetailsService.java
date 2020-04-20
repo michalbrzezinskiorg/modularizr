@@ -16,7 +16,6 @@ import reactor.util.function.Tuple2;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,34 +30,35 @@ class SecurityUserDetailsService implements ReactiveUserDetailsService {
         Mono<UserGatewayDTO> user = client.getUserByLogin(username);
         Mono<Flux<RoleGatewayDTO>> roles = user.map(client::findRolesByUser);
         Mono<Flux<PermissionGatewayDTO>> permissions = user.map(client::findByPermissionFor);
-        Mono<List<Set<ControllerGatewayDTO>>> controllersFromRoles = getControllersFromRoles(roles);
-        Mono<List<Set<ControllerGatewayDTO>>> controllersFromPermissions = getControllersFromPermissions(permissions);
-        Flux<List<ControllerGatewayDTO>> controllers = getControllersList(controllersFromRoles, controllersFromPermissions);
-        Flux<UserDetails> r = joinStreams(user, controllers);
-        return Mono.from(r);
+        Flux<ControllerGatewayDTO> controllersFromRoles = getControllersFromRoles(roles);
+        Flux<ControllerGatewayDTO> controllersFromPermissions = getControllersFromPermissions(permissions);
+        Flux<ControllerGatewayDTO> controllers = Flux.concat(controllersFromRoles, controllersFromPermissions);
+        return joinStreams(user, controllers);
     }
 
-    private Mono<List<Set<ControllerGatewayDTO>>> getControllersFromRoles(Mono<Flux<RoleGatewayDTO>> roles) {
+    private Flux<ControllerGatewayDTO> getControllersFromRoles(Mono<Flux<RoleGatewayDTO>> roles) {
         return roles.flatMap(Flux::collectList)
-                .map(a -> a.stream().map(RoleGatewayDTO::getController)
-                        .collect(Collectors.toList()));
-    }
-
-    private Mono<List<Set<ControllerGatewayDTO>>> getControllersFromPermissions(Mono<Flux<PermissionGatewayDTO>> permissions) {
-        return permissions.flatMap(Flux::collectList)
-                .map(a -> a.stream().map(PermissionGatewayDTO::getControllers)
-                        .collect((Collectors.toList())));
-    }
-
-    private Flux<List<ControllerGatewayDTO>> getControllersList(Mono<List<Set<ControllerGatewayDTO>>> f, Mono<List<Set<ControllerGatewayDTO>>> p) {
-        return Flux.concat(f, p)
-                .flatMap(s -> Flux.just(s.stream()
+                .map(a -> a.stream()
+                        .map(RoleGatewayDTO::getController)
                         .flatMap(Collection::stream)
-                        .collect(Collectors.toList())));
+                        .collect(Collectors.toList()))
+                .flatMapMany(Flux::fromIterable);
     }
 
-    private Flux<UserDetails> joinStreams(Mono<UserGatewayDTO> userByLogin, Flux<List<ControllerGatewayDTO>> map) {
-        return map.zipWith(userByLogin).map(this::buildUser).switchIfEmpty(Flux.defer(() -> buildUser(userByLogin)));
+    private Flux<ControllerGatewayDTO> getControllersFromPermissions(Mono<Flux<PermissionGatewayDTO>> permissions) {
+        return permissions.flatMap(Flux::collectList)
+                .map(a -> a.stream()
+                        .map(PermissionGatewayDTO::getControllers)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList()))
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    private Mono<UserDetails> joinStreams(Mono<UserGatewayDTO> userByLogin, Flux<ControllerGatewayDTO> map) {
+        return map.collectList()
+                .zipWith(userByLogin)
+                .map(this::buildUser)
+                .switchIfEmpty(Mono.defer(() -> buildUser(userByLogin)));
     }
 
     private Mono<UserDetails> buildUser(Mono<UserGatewayDTO> userGatewayDTOMono) {

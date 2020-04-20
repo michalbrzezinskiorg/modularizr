@@ -36,13 +36,20 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     @Override
     public Mono<User> save(User user) {
         UserDBRow entity = modelMapper.map(user, UserDBRow.class);
-        entity.setPasswordEncrypted(passwordEncoder.encode(user.getPassword()));
-        entity.setPasswordChanged(LocalDateTime.now());
+        String password = user.getPassword();
+        handlePasswordChange(entity, password);
         entity.setId(UUID.nameUUIDFromBytes(entity.getLogin().getBytes()));
         return userRepository.save(entity)
                 .doFirst(() -> log.info("save(User user) saving [{}]", entity))
                 .doOnError(e -> log.error(e.getMessage()))
                 .map(a -> modelMapper.map(a, User.class));
+    }
+
+    private void handlePasswordChange(UserDBRow entity, String password) {
+        if (password != null && !password.isBlank()) {
+            entity.setPasswordEncrypted(passwordEncoder.encode(password));
+            entity.setPasswordChanged(LocalDateTime.now());
+        }
     }
 
     @Override
