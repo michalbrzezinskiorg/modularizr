@@ -6,6 +6,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -23,16 +24,16 @@ public class AppconfigController {
 
     private final AppconfigService appconfigService;
 
+    @PostMapping("users")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public void createUser(@RequestBody User user) {
+        appconfigService.createUser(user);
+    }
+
     @GetMapping("user/{login}")
     public Mono<User> getUserByLogin(@PathVariable String login, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
         return appconfigService.getUserByLogin(login);
-    }
-
-    @PostMapping("users")
-    public Mono<Void> createUser(@RequestBody User user, @RequestHeader("instance") String instance) {
-        internalSecurity(instance);
-        return appconfigService.createUser(user);
     }
 
     @GetMapping("user/{id}/roles")
@@ -54,6 +55,7 @@ public class AppconfigController {
     }
 
     @PostMapping("controllers")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addNewControllerToDatabase(@RequestBody Controller controller, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
         appconfigService.addNewControllerToDatabase(controller);

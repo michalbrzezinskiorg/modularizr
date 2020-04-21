@@ -37,10 +37,10 @@ class AppconfigService {
     }
 
     public Mono<User> getUserByLogin(String login) {
-        return appconfigPostgresPort.findUserByLogin(login);
+        return appconfigPostgresPort.findUserByLogin(login).log();
     }
 
-    public Flux<Role> findRolesByUser(@PathVariable("id") UUID userId) {
+    public Flux<Role> findRolesByUser(UUID userId) {
         return appconfigPostgresPort.findRolesByUser(userId);
     }
 
@@ -48,11 +48,20 @@ class AppconfigService {
         return appconfigPostgresPort.findByPermissionFor(userId);
     }
 
-    public Mono<Void> createUser(User user) {
-        Mono<User> userByLogin = appconfigPostgresPort.findUserByLogin(user.getLogin());
-        return userByLogin
-                .filter(r -> r == null)
-                .doFinally(u -> applicationEventsPublisher.publish(new UserAccountCreated(user)))
-                .then(Mono.empty());
+    public void createUser(User user) {
+        log.info("going to create USER [{}]", user);
+        appconfigPostgresPort.findUserByLogin(user.getLogin())
+                .switchIfEmpty(Mono.defer(() -> {
+                    publishUserAccountCreated(new UserAccountCreated(user));
+                    return Mono.empty();
+                }))
+                .doOnSuccess(e -> log.info("createUser: [{}] success!", e))
+                .doOnError(e -> log.error("createUser: [{}]", e.getMessage()))
+                .subscribe();
+    }
+
+    private void publishUserAccountCreated(UserAccountCreated e) {
+        log.info("applicationEventsPublisher.publish([{}])", e);
+        applicationEventsPublisher.publish(e);
     }
 }

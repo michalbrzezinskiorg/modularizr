@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 
 import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
@@ -30,18 +29,10 @@ class SecurityAppConfigClient {
 
     @Value("${app.context.url}")
     String url;
-    @Value("${server.servlet.context-path}")
-    String ctx;
-    private String applicationUri;
-
-    @PostConstruct
-    public void setApplicationUri() {
-        applicationUri = url + ctx;
-    }
 
     public Mono<UserGatewayDTO> getUserByLogin(String login) {
         return webClient.get()
-                .uri(applicationUri + APPLICATION_USER + login)
+                .uri(url + APPLICATION_USER + login)
                 .header(HEADER_NAME, INSTANCE_ID)
                 .exchange()
                 .map(r -> r == null ? new RuntimeException() : r)
@@ -52,7 +43,7 @@ class SecurityAppConfigClient {
     public Flux<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
         return webClient
                 .get()
-                .uri(applicationUri + APPLICATION_USER + user.getId() + "/permissions")
+                .uri(url + APPLICATION_USER + user.getId() + "/permissions")
                 .header(HEADER_NAME, INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(PermissionGatewayDTO.class);
@@ -61,16 +52,16 @@ class SecurityAppConfigClient {
     public Flux<RoleGatewayDTO> findRolesByUser(UserGatewayDTO user) {
         return webClient
                 .get()
-                .uri(applicationUri + APPLICATION_USER + user.getId() + "/roles")
+                .uri(url + APPLICATION_USER + user.getId() + "/roles")
                 .header(HEADER_NAME, INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(RoleGatewayDTO.class);
     }
 
-    public void addNewControllerToDatabase(final Controller c, final String instanceId) {
+    public void addNewControllerToDatabase(final Controller c) {
         webClient
                 .post()
-                .uri(applicationUri + APPLICATION_CONTROLLERS)
+                .uri(url + APPLICATION_CONTROLLERS)
                 .header(HEADER_NAME, INSTANCE_ID)
                 .bodyValue(c)
                 .retrieve().toBodilessEntity()

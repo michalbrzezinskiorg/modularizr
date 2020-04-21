@@ -33,7 +33,9 @@ class SecurityUserDetailsService implements ReactiveUserDetailsService {
         Flux<ControllerGatewayDTO> controllersFromRoles = getControllersFromRoles(roles);
         Flux<ControllerGatewayDTO> controllersFromPermissions = getControllersFromPermissions(permissions);
         Flux<ControllerGatewayDTO> controllers = Flux.concat(controllersFromRoles, controllersFromPermissions);
-        return joinStreams(user, controllers);
+        Mono<UserDetails> userDetailsMono = joinStreams(user, controllers);
+        userDetailsMono.log("userDetailsMono");
+        return userDetailsMono.checkpoint("findByUsername return joinStreams(user, controllers)");
     }
 
     private Flux<ControllerGatewayDTO> getControllersFromRoles(Mono<Flux<RoleGatewayDTO>> roles) {
@@ -61,28 +63,39 @@ class SecurityUserDetailsService implements ReactiveUserDetailsService {
                 .switchIfEmpty(Mono.defer(() -> buildUser(userByLogin)));
     }
 
-    private Mono<UserDetails> buildUser(Mono<UserGatewayDTO> userGatewayDTOMono) {
-        return userGatewayDTOMono.map(u -> User
-                .withUsername(u.getLogin())
-                .password(u.getPassword())
-                .build());
+    private UserDetails buildUser(Tuple2<List<ControllerGatewayDTO>, UserGatewayDTO> u) {
+        return getUser(u.getT2(), getRoles(u));
     }
 
-    private UserDetails buildUser(Tuple2<List<ControllerGatewayDTO>, UserGatewayDTO> u) {
-        return User
-                .withUsername(u.getT2().getLogin())
-                .password(u.getT2().getPassword())
-                .roles(getRoles(u))
+    private Mono<UserDetails> buildUser(Mono<UserGatewayDTO> userByLogin) {
+        log.info(" :::: Flux<ControllerGatewayDTO> map ===> switchIfEmpty");
+        return userByLogin.map(u -> getUser(u, new String[0]));
+    }
+
+    private UserDetails getUser(UserGatewayDTO u, String[] roles) {
+        log.info("getUser(UserGatewayDTO {})", u);
+        UserDetails user = User
+                .withUsername(u.getLogin())
+                .password(u.getPassword())
+                .authorities(roles)
                 .build();
+        log.info("user [{}]", user);
+        return user;
     }
 
     private String[] getRoles(Tuple2<List<ControllerGatewayDTO>, UserGatewayDTO> u) {
         List<ControllerGatewayDTO> controllers = u.getT1();
         return controllers.stream()
-                .map(c -> SecurityConfig.stringifyController(
-                        c.getController(),
-                        c.getMethod(),
-                        c.getHttpMethod())).toArray(String[]::new);
+                .map(this::getStringifiedController)
+                .toArray(String[]::new);
+    }
+
+    private String getStringifiedController(ControllerGatewayDTO c) {
+        log.info("getStringifiedController(ControllerGatewayDTO {})", c);
+        return SecurityConfig.stringifyController(
+                c.getController(),
+                c.getMethod(),
+                c.getHttpMethod());
     }
 
 }

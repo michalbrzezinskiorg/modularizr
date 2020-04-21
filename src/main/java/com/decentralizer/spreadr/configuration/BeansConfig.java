@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -40,6 +41,11 @@ class BeansConfig {
     }
 
     @Bean
+    PasswordEncoder getPasswordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
     public Converter<LocalDateTime, ZonedDateTime> localDateTime2ZonedDateTimeConverter() {
         return new Converter<>() {
             @Override
@@ -53,12 +59,6 @@ class BeansConfig {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
 
     private ExchangeFilterFunction filter() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {

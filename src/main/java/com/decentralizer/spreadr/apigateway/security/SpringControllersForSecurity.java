@@ -18,8 +18,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
-
 @Component
 @Transactional
 @Slf4j
@@ -49,7 +47,7 @@ class SpringControllersForSecurity {
     private void addNewControllersToDatabase() {
         controllers.stream()
                 .map(getAnnotatedControllerActionFunction())
-                .forEach(c -> securityAppConfigClient.addNewControllerToDatabase(c, INSTANCE_ID));
+                .forEach(securityAppConfigClient::addNewControllerToDatabase);
     }
 
     private Function<AnnotatedController, Controller> getAnnotatedControllerActionFunction() {

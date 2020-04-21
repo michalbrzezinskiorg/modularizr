@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import java.util.ArrayList;
@@ -20,17 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 class SecurityConfig {
 
-    public static final String WEBSOCKET = "/messages/**";
-    private static final String LOGOUT = "/users/logout";
-    private static final String EXCEPTION = "/error";
     private static final String POST_USERS_INTERNAL = "/application/users";
     private static final String USERS_INTERNAL = "/application/user/**";
     private static final String CONTROLLERS_INTERNAL = "/application/controllers/";
-    private static final String SWAGGER = "/swagger-ui.http";
-    private static final String FILES_ONE = "/files/one/**";
-    private static final String H2 = "/h2/**";
-    private static final String USERS_WHOAMI = "/users/whoami";
-    private static final String[] PUBLIC_PLACES = {WEBSOCKET, POST_USERS_INTERNAL, CONTROLLERS_INTERNAL, USERS_INTERNAL, SWAGGER, LOGOUT, FILES_ONE, USERS_WHOAMI, H2, EXCEPTION};
+    private static final String[] PUBLIC_PLACES = {POST_USERS_INTERNAL, CONTROLLERS_INTERNAL, USERS_INTERNAL};
 
     private final SpringControllersForSecurity springControllersDiscovery;
 
@@ -42,15 +36,20 @@ class SecurityConfig {
     }
 
     @Bean
-    public SecurityWebFilterChain configure(ServerHttpSecurity httpSecurity) throws Exception {
+    public SecurityWebFilterChain configure(ServerHttpSecurity httpSecurity) {
         log.info("configure(HttpSecurity [{}])", httpSecurity);
         final List<String> publicPlacesAsList = Arrays.asList(PUBLIC_PLACES);
         List<String> nonPublicControllers = getNonPublicControllers(publicPlacesAsList);
-        ServerHttpSecurity.AuthorizeExchangeSpec expr = setHttpSecurityForPublicPlaces(httpSecurity);
+        var expr = setHttpSecurityForPublicPlaces(httpSecurity);
         setHttpSecurityForAuthorities(expr, nonPublicControllers);
         options(expr);
         finish(expr);
+        csrf(httpSecurity);
         return httpSecurity.build();
+    }
+
+    private void csrf(ServerHttpSecurity httpSecurity) {
+        httpSecurity.csrf(CsrfSpec::disable);
     }
 
     private ArrayList<String> getNonPublicControllers(List<String> publicPlacesAsList) {
