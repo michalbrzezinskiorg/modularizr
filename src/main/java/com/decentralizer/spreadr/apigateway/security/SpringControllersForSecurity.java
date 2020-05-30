@@ -7,7 +7,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -20,10 +19,9 @@ import java.util.stream.Stream;
 
 import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
 
-@Component
-@Transactional
 @Slf4j
 @RequiredArgsConstructor
+@Component
 class SpringControllersForSecurity {
 
     private static final String GET = "GET";

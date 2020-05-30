@@ -38,22 +38,19 @@ public class AppconfigController {
     @GetMapping("user/{login}")
     public Mono<User> getUserByLogin(@PathVariable String login, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        Mono<User> userByLogin = appconfigService.getUserByLogin(login);
-        return userByLogin;
+        return appconfigService.getUserByLogin(login);
     }
 
     @GetMapping("user/{id}/roles")
     public Flux<Role> findRolesByUser(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        Flux<Role> rolesByUser = appconfigService.findRolesByUser(userId);
-        return rolesByUser;
+        return appconfigService.findRolesByUser(userId);
     }
 
     @GetMapping("user/{id}/permissions")
     public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        Flux<Permission> byPermissionFor = appconfigService.findByPermissionFor(userId);
-        return byPermissionFor;
+        return appconfigService.findByPermissionFor(userId);
     }
 
     @PostMapping("users")
