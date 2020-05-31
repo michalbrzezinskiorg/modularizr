@@ -3,9 +3,11 @@ package com.decentralizer.spreadr.modules.welcome;
 import com.decentralizer.spreadr.modules.welcome.dto.ArticlesDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-public class WelcomeService {
+@Service
+class WelcomeService {
 
     ArticlesRepository articlesRepository;
     ModelMapper modelMapper;

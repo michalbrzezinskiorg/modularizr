@@ -18,20 +18,20 @@ class AppconfigEventsListener {
 
     public void handleMessage(UserLoggedInEvent message) {
         log.info("AppconfigEventsListener handleMessage [{}]", message);
-        postgresPort.save(message.getUser()).subscribe();
+        postgresPort.save(message.getPayload()).subscribe();
     }
 
     public void handleMessage(UserAccountCreated message) {
         log.info("AppconfigEventsListener handleMessage [{}]", message);
-        postgresPort.save(message.getUser()).subscribe();
+        postgresPort.save(message.getPayload()).subscribe();
     }
 
     public void handleMessage(NewControllerFound message) {
         log.info("AppconfigEventsListener handleMessage [{}]", message);
         if (message.isCompensation()) {
-            handleCompensation(message.getController());
+            handleCompensation(message.getPayload());
         } else {
-            handleAction(message.getController());
+            handleAction(message.getPayload());
         }
     }
 

@@ -12,26 +12,8 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewControllerFound implements ApplicationMessage {
-    private Controller controller;
+    private Controller payload;
     private boolean compensation;
     private ZonedDateTime published;
 
-    public NewControllerFound(Controller controller) {
-        this.controller = controller;
-    }
-
-    public NewControllerFound(Controller controller, boolean compensation) {
-        this.controller = controller;
-        this.compensation = compensation;
-    }
-
-    @Override
-    public ZonedDateTime publishedDate() {
-        return published;
-    }
-
-    @Override
-    public boolean isCompensation() {
-        return this.compensation;
-    }
 }

@@ -26,7 +26,6 @@ class ArticlesService {
                 .flatMap(a -> Mono.error(new SuchArticleExists()))
                 .switchIfEmpty(Mono.defer(() -> create(event)))
                 .subscribe();
-
     }
 
     public void update(ArticleDto article) {
@@ -34,7 +33,6 @@ class ArticlesService {
                 .flatMap(a -> Mono.just(updateArticle(a, article)))
                 .switchIfEmpty(Mono.error(new NoSuchArticleExists()))
                 .doOnSuccess(a -> applicationEventsPublisher.publish(new ArticleUpdatedMessage(a, false)));
-
     }
 
     private Article updateArticle(Article a, ArticleDto article) {

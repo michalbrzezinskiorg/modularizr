@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Service
@@ -31,7 +32,7 @@ class AppconfigService {
     public void addNewControllerToDatabase(Controller controller) {
         boolean exists = appconfigPostgresPort.existsControllerById(controller);
         if (!exists)
-            applicationEventsPublisher.publish(new NewControllerFound(controller));
+            applicationEventsPublisher.publish(new NewControllerFound(controller, false, ZonedDateTime.now()));
         else
             log.warn("trying to persist [{}] seems to be duplicate", controller);
     }

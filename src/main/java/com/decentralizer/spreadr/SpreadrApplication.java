@@ -23,8 +23,6 @@ public class SpreadrApplication {
                                 + ZonedDateTime.now().toString())
                                 .getBytes()
                 );
-
-        //BlockHound.install();
     }
 
     public static void main(String[] args) {

@@ -9,22 +9,13 @@ import java.time.ZonedDateTime;
 
 @Data
 @NoArgsConstructor
-public class UserAccountCreated implements ApplicationMessage {
-    private boolean componsation;
-    private User user;
+public class UserAccountCreated implements ApplicationMessage<User> {
+    private boolean compensation;
+    private User payload;
     private ZonedDateTime published;
 
     public UserAccountCreated(User user) {
-        this.user = user;
+        this.payload = user;
     }
 
-    @Override
-    public ZonedDateTime publishedDate() {
-        return published;
-    }
-
-    @Override
-    public boolean isCompensation() {
-        return componsation;
-    }
 }
