@@ -1,4 +1,4 @@
-package com.decentralizer.spreadr.modules.cms.messages;
+package com.decentralizer.spreadr.modules.cms.events;
 
 import com.decentralizer.spreadr.configuration.ApplicationMessage;
 import com.decentralizer.spreadr.modules.cms.domain.Article;

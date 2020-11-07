@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -92,6 +93,7 @@ class AppConfigClient {
                 .post()
                 .uri(applicationUri + "/application/users")
                 .header("instance", INSTANCE_ID)
+                .body(BodyInserters.fromValue(userGatewayDTO))
                 .retrieve()
                 .toBodilessEntity()
                 .doFirst(() -> log.info("addNewControllerToDatabase before [{}]", userGatewayDTO))

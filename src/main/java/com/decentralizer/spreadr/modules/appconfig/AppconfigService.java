@@ -51,6 +51,7 @@ class AppconfigService {
 
     public Mono<Void> createUser(User user) {
         Mono<User> userByLogin = appconfigPostgresPort.findUserByLogin(user.getLogin());
+        user.setActive(true);
         return userByLogin
                 .filter(r -> r == null)
                 .doFinally(u -> applicationEventsPublisher.publish(new UserAccountCreated(user)))

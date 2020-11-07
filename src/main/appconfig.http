@@ -1,0 +1,10 @@
+POST http://localhost:8080/api/application/users
+Content-Type: application/json
+instance: [bnVsbF9ydW50aW1lSWQ6Njk4OGUwZTktMDBjZC00ZDE1LWExOTItOTFkZWI5ZjZmNmI3X3J1bnRpbWVab25lZERhdGVUaW1lOjIwMjAtMTEtMDdUMjA6MTA6MTEuNzgyNjAzKzAxOjAwW0V1cm9wZS9XYXJzYXdd]
+
+{
+  "login": "oa@ij.sd",
+  "password": "oijaodij"
+}
+
+###

@@ -1,12 +1,15 @@
 package com.decentralizer.spreadr.modules.appconfig;
 
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
+import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
 import com.decentralizer.spreadr.modules.appconfig.events.UserAccountCreated;
 import com.decentralizer.spreadr.modules.appconfig.events.UserLoggedInEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -23,7 +26,9 @@ class AppconfigEventsListener {
 
     public void handleMessage(UserAccountCreated message) {
         log.info("AppconfigEventsListener handleMessage [{}]", message);
-        postgresPort.save(message.getPayload()).subscribe();
+        User user = message.getPayload();
+        user.setActivated(LocalDateTime.now());
+        postgresPort.save(user).subscribe();
     }
 
     public void handleMessage(NewControllerFound message) {

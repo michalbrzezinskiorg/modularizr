@@ -5,6 +5,7 @@ import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Data
@@ -16,6 +17,10 @@ public class UserAccountCreated implements ApplicationMessage<User> {
 
     public UserAccountCreated(User user) {
         this.payload = user;
+        user.setActive(true);
+        user.setActivated(LocalDateTime.now());
+        user.setCreated(LocalDateTime.now());
+        published = ZonedDateTime.now();
     }
 
 }
