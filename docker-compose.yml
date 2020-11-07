@@ -3,6 +3,8 @@ services:
   java:
     container_name: modularizr_java
     image: azul/zulu-openjdk-alpine:13
+    environment:
+      - "kafka1:9091,kafka2:9092,kafka3:9093"
     volumes:
       - "./target:/home/app"
       - "./resources:/resources"
@@ -18,8 +20,6 @@ services:
       - kafka1
       - kafka2
       - kafka3
-      - kafka4
-      - kafka5
   postgres:
     image: postgres:9.6
     container_name: modularizr_postgres
@@ -102,7 +102,7 @@ services:
       - KAFKA_LOG_RETENTION_MS=-1
       - KAFKA_LOG_RETENTION_HOURS=-1
       - KAFKA_BROKER_ID=1
-      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
+      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093
       - ZOOKEEPER=localhost:2181
     volumes:
       - ./data/kafka/kafka1:/var/lib/kafka/data
@@ -120,7 +120,7 @@ services:
       - KAFKA_LOG_RETENTION_MS=-1
       - KAFKA_LOG_RETENTION_HOURS=-1
       - KAFKA_BROKER_ID=2
-      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
+      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093
       - ZOOKEEPER=zookeeper:2181
     volumes:
       - ./data/kafka/kafka2:/var/lib/kafka/data
@@ -138,44 +138,7 @@ services:
       - KAFKA_LOG_RETENTION_MS=-1
       - KAFKA_LOG_RETENTION_HOURS=-1
       - KAFKA_BROKER_ID=3
-      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
+      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,x:9093
       - ZOOKEEPER=zookeeper:2181
     volumes:
       - ./data/kafka/kafka3:/var/lib/kafka/data
-  kafka4:
-    container_name: modularizr_kafka4
-    image: confluentinc/cp-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9094:9094"
-    environment:
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka4:9094
-      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9094
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_LOG_RETENTION_MS=-1
-      - KAFKA_LOG_RETENTION_HOURS=-1
-      - KAFKA_BROKER_ID=4
-      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
-      - ZOOKEEPER=zookeeper:2181
-    volumes:
-      - ./data/kafka/kafka4:/var/lib/kafka/data
-  kafka5:
-    container_name: modularizr_kafka5
-    image: confluentinc/cp-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9095:9095"
-    environment:
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka5:9095
-      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9095
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_LOG_RETENTION_MS=-1
-      - KAFKA_LOG_CLEANER_ENABLE=false
-      - KAFKA_LOG_RETENTION_HOURS=-1
-      - KAFKA_BROKER_ID=5
-      - BOOTSTRAP_SERVERS=kafka1:9091,kafka2:9092,kafka3:9093,kafka4:9094,kafka5:9095
-      - ZOOKEEPER=zookeeper:2181
-    volumes:
-      - ./data/kafka/kafka5:/var/lib/kafka/data

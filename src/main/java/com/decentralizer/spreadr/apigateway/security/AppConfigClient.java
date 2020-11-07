@@ -6,6 +6,7 @@ import com.decentralizer.spreadr.apigateway.domain.UserGatewayDTO;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -17,13 +18,12 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 
-import static com.decentralizer.spreadr.SpreadrApplication.INSTANCE_ID;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
 class AppConfigClient {
 
+    @Autowired
     private final WebClient webClient;
 
     @Value("${app.context.url}")
@@ -40,7 +40,6 @@ class AppConfigClient {
     public Mono<UserGatewayDTO> getUserByLogin(String login) {
         return webClient.get()
                 .uri(applicationUri + "/application/user/" + login)
-                .header("instance", INSTANCE_ID)
                 .exchange()
                 .map(r -> r == null ? new RuntimeException() : r)
                 .flatMap(m -> ((ClientResponse) m).bodyToMono(UserGatewayDTO.class))
@@ -51,7 +50,6 @@ class AppConfigClient {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/user/" + user.getId() + "/permissions")
-                .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(PermissionGatewayDTO.class);
     }
@@ -60,7 +58,6 @@ class AppConfigClient {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/user/" + user.getId() + "/roles")
-                .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(RoleGatewayDTO.class);
     }
@@ -69,7 +66,6 @@ class AppConfigClient {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/controllers/")
-                .header("instance", INSTANCE_ID)
                 .retrieve()
                 .bodyToFlux(Controller.class);
     }
@@ -78,7 +74,6 @@ class AppConfigClient {
         webClient
                 .post()
                 .uri(applicationUri + "/application/controllers/")
-                .header("instance", INSTANCE_ID)
                 .bodyValue(c)
                 .retrieve().toBodilessEntity()
                 .doOnError(e -> log.error("addNewControllerToDatabase error [{}]", e.getMessage()))
@@ -92,7 +87,6 @@ class AppConfigClient {
         return webClient
                 .post()
                 .uri(applicationUri + "/application/users")
-                .header("instance", INSTANCE_ID)
                 .body(BodyInserters.fromValue(userGatewayDTO))
                 .retrieve()
                 .toBodilessEntity()
