@@ -4,7 +4,6 @@ import com.decentralizer.spreadr.database.postgres.tables.ControllerDBRow;
 import com.decentralizer.spreadr.database.postgres.tables.UserDBRow;
 import com.decentralizer.spreadr.modules.appconfig.AppconfigPostgresPort;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
-import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
 
     private final UserRepository userRepository;
     private final ControllerRepository controllerRepository;
-    private final PermissionRepository permissionRepository;
     private final ModelMapper modelMapper;
     private final RolesRepository rolesRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -73,9 +71,9 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
     }
 
     @Override
-    public Flux<Permission> findByPermissionFor(UUID userId) {
-        return permissionRepository.findByPermissionFor(userId)
-                .map(a -> modelMapper.map(a, Permission.class));
+    public Flux<Controller> findControllersByPermissionFor(UUID userId) {
+        return controllerRepository.findByPermissionFor(userId)
+                .map(c -> modelMapper.map(c, Controller.class));
     }
 
     @Override
@@ -97,4 +95,10 @@ class AppconfigPostgresAdapter implements AppconfigPostgresPort {
         String id = controller.getController() + controller.getHttpMethod() + controller.getMethod();
         return findControllerById(id).blockOptional().isPresent();
     }
+
+    @Override
+    public Flux<Controller> findControllersByGroupsOfUser(UUID userId) {
+        return controllerRepository.findControllersByGroupsOfUser(userId);
+    }
+
 }

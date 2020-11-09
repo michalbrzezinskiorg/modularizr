@@ -10,8 +10,7 @@ import java.util.UUID;
 
 @Data
 public class User {
-    private
-    Set<UserProfileDBRow> profiles = new HashSet<>();
+    private Set<UserProfileDBRow> profiles = new HashSet<>();
     private UUID id;
     private String name;
     private String surname;

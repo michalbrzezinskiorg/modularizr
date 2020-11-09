@@ -2,7 +2,6 @@ package com.decentralizer.spreadr.modules.appconfig;
 
 import com.decentralizer.spreadr.configuration.ApplicationEventsPublisher;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
-import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
@@ -30,11 +29,12 @@ class AppconfigService {
     }
 
     public void addNewControllerToDatabase(Controller controller) {
+        log.warn("trying to persist controller [{}]", controller);
         boolean exists = appconfigPostgresPort.existsControllerById(controller);
         if (!exists)
             applicationEventsPublisher.publish(new NewControllerFound(controller, false, ZonedDateTime.now()));
         else
-            log.warn("trying to persist [{}] seems to be duplicate", controller);
+            log.warn("controller [{}] seems to be duplicate", controller);
     }
 
     public Mono<User> getUserByLogin(String login) {
@@ -45,8 +45,10 @@ class AppconfigService {
         return appconfigPostgresPort.findRolesByUser(userId);
     }
 
-    public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId) {
-        return appconfigPostgresPort.findByPermissionFor(userId);
+    public Flux<Controller> findControllersByUser(@PathVariable("id") UUID userId) {
+        Flux<Controller> permissions = appconfigPostgresPort.findControllersByPermissionFor(userId);
+        Flux<Controller> groups = appconfigPostgresPort.findControllersByGroupsOfUser(userId);
+        return Flux.concat(permissions, groups);
     }
 
     public Mono<Void> createUser(User user) {

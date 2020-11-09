@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 public class Role {
-    private int id;
+    private UUID id;
     private String name;
     private Set<Controller> controllers = new HashSet<>();
     private Set<User> users = new HashSet<>();

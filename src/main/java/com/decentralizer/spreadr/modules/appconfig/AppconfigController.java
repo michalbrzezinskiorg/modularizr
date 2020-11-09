@@ -1,7 +1,6 @@
 package com.decentralizer.spreadr.modules.appconfig;
 
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
-import com.decentralizer.spreadr.modules.appconfig.domain.Permission;
 import com.decentralizer.spreadr.modules.appconfig.domain.Role;
 import com.decentralizer.spreadr.modules.appconfig.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class AppconfigController {
     private final AppconfigService appconfigService;
 
     @GetMapping("controllers")
-    public Flux<Controller> findAllControllers(@RequestHeader("instance") String instance) {
+    public Flux<Controller> findAllControllers(@RequestHeader(value = "instance") String instance) {
         internalSecurity(instance);
         return appconfigService.findAllControllers();
     }
@@ -47,10 +46,10 @@ public class AppconfigController {
         return appconfigService.findRolesByUser(userId);
     }
 
-    @GetMapping("user/{id}/permissions")
-    public Flux<Permission> findByPermissionFor(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
+    @GetMapping("user/{id}/controllers")
+    public Flux<Controller> findByPermissionFor(@PathVariable("id") UUID userId, @RequestHeader("instance") String instance) {
         internalSecurity(instance);
-        return appconfigService.findByPermissionFor(userId);
+        return appconfigService.findControllersByUser(userId);
     }
 
     @PostMapping("users")

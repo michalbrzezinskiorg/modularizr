@@ -39,7 +39,6 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
         Mono<UserGatewayDTO> user = getUser(authentication);
         authenticateUser(authentication.getCredentials().toString(), user);
         Set<Authority> authorities = new HashSet<>();
-        setRoles(user, authorities);
         setPermissions(user, authorities);
         authorities.forEach(authority -> log.info("authority [{}] ", authority));
         return new UsernamePasswordAuthenticationToken(authentication.getName(), authentication.getCredentials().toString(), authorities);
@@ -87,12 +86,12 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
 
     private void setPermissions(Mono<UserGatewayDTO> user, Set<Authority> authorities) {
         log.info("finding permissions by user [{}]", user);
-        user.map(u -> appConfigClient.findByPermissionFor(u))
-                .block()
-                .filter(p -> p.isActive()).toStream()
-                .forEach(permission ->
-                        permission.getControllers()
-                                .forEach(c -> addControllersToAuthorities(authorities)));
+        user.subscribe(
+                u ->
+                        appConfigClient.findByPermissionFor(u.getId()).subscribe(
+                                p -> p.getControllers().forEach(c -> addControllersToAuthorities(authorities))
+                        ))
+        ;
     }
 
     private Consumer<ControllerGatewayDTO> addControllersToAuthorities(Set<Authority> authorities) {
@@ -103,12 +102,6 @@ class AuthenticationProviderImpl implements AuthenticationProvider {
             authorities.add(new Authority(stringified));
             log.info("added authority: [{}]", stringified);
         };
-    }
-
-    private void setRoles(Mono<UserGatewayDTO> user, Set<Authority> authorities) {
-        log.info("setRoles [{}]", user);
-        user.map(appConfigClient::findRolesByUser).block().toStream()
-                .forEach(addRoleControllersToAuthorities(authorities));
     }
 
     private Consumer<RoleGatewayDTO> addRoleControllersToAuthorities(Set<Authority> authorities) {

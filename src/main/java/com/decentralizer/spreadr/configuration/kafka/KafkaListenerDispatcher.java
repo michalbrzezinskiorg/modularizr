@@ -1,6 +1,7 @@
 package com.decentralizer.spreadr.configuration.kafka;
 
 import com.decentralizer.spreadr.modules.appconfig.AppconfigEventsListener;
+import com.decentralizer.spreadr.modules.appconfig.events.NewControllerFound;
 import com.decentralizer.spreadr.modules.appconfig.events.UserAccountCreated;
 import com.decentralizer.spreadr.modules.appconfig.events.UserLoggedInEvent;
 import com.decentralizer.spreadr.modules.cms.CmsEventHandler;
@@ -30,6 +31,11 @@ public class KafkaListenerDispatcher {
 
     @KafkaHandler
     public void listen(UserAccountCreated message) {
+        appconfigEventsListener.handleMessage(message);
+    }
+
+    @KafkaHandler
+    public void listen(NewControllerFound message) {
         appconfigEventsListener.handleMessage(message);
     }
 

@@ -6,7 +6,6 @@ import com.decentralizer.spreadr.apigateway.domain.UserGatewayDTO;
 import com.decentralizer.spreadr.modules.appconfig.domain.Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -17,13 +16,13 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 class AppConfigClient {
 
-    @Autowired
     private final WebClient webClient;
 
     @Value("${app.context.url}")
@@ -46,10 +45,10 @@ class AppConfigClient {
                 .retryBackoff(1, Duration.ofSeconds(1));
     }
 
-    public Flux<PermissionGatewayDTO> findByPermissionFor(UserGatewayDTO user) {
+    public Flux<PermissionGatewayDTO> findByPermissionFor(UUID userId) {
         return webClient
                 .get()
-                .uri(applicationUri + "/application/user/" + user.getId() + "/permissions")
+                .uri(applicationUri + "/application/user/" + userId + "/controllers")
                 .retrieve()
                 .bodyToFlux(PermissionGatewayDTO.class);
     }
@@ -62,7 +61,7 @@ class AppConfigClient {
                 .bodyToFlux(RoleGatewayDTO.class);
     }
 
-    public Flux<Controller> findAllControllers(String instanceId) {
+    public Flux<Controller> findAllControllers() {
         return webClient
                 .get()
                 .uri(applicationUri + "/application/controllers/")
